@@ -1,0 +1,47 @@
+# .github/workflows/ci-main.yml
+name: CI — main 🚀
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build-and-test:
+    name: Build & Test (Node 20) 🧪
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: true
+    env:
+      CI: true
+    steps:
+      - name: ⬇️ Checkout
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: npm
+
+      - name: 📦 Install, 🔎 Typecheck, 🏗️ Build, ✅ Test
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run typecheck
+          npm run build
+          npm test -- --run

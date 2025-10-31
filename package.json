@@ -32,21 +32,21 @@
   "peerDependencies": {
     "@emotion/react": ">=11",
     "@emotion/styled": ">=11",
-    "@mui/icons-material": ">=7",
-    "@mui/material": ">=7",
+    "@mui/icons-material": "^7.3.4",
+    "@mui/material": "^7.3.4",
     "react": ">=18",
     "react-dom": ">=18"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.4.2",
+    "@testing-library/react": "^16.3.0",
+    "@vitejs/plugin-react": "^5.1.0",
+    "jsdom": "^22.1.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "@testing-library/react": "^16.3.0",
-    "@testing-library/jest-dom": "^6.4.2",
-    "vitest": "^4.0.5",
-    "jsdom": "^22.1.0",
-    "@vitejs/plugin-react": "^5.1.0",
+    "tsup": "^8.5.0",
     "typescript": "^5.9.3",
-    "tsup": "^8.5.0"
+    "vitest": "^4.0.5"
   },
   "peerDependenciesMeta": {
     "@emotion/react": {
@@ -83,5 +83,8 @@
   ],
   "publishConfig": {
     "access": "public"
+  },
+  "dependencies": {
+    "@ameshkin/nextcrumbs": "^0.0.4"
   }
 }
