@@ -1,0 +1,89 @@
+{
+  "name": "@ameshkin/nextcrumbs",
+  "version": "0.0.1",
+  "description": "MUI 7 breadcrumbs with Next.js Link support, optional URL auto-generation, and SEO microdata.",
+  "license": "MIT",
+  "type": "module",
+  "author": "Amir Meshkin <amir.meshkin@gmail.com> (https://github.com/ameshkin)",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsup",
+    "clean": "rimraf dist",
+    "prepublishOnly": "npm run build",
+    "prepare": "npm run build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "test:watch": "vitest --watch"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": false,
+  "peerDependencies": {
+    "@emotion/react": ">=11",
+    "@emotion/styled": ">=11",
+    "@mui/icons-material": ">=7",
+    "@mui/material": ">=7"
+  },
+  "peerDependenciesMeta": {
+    "@emotion/react": {
+      "optional": false
+    },
+    "@emotion/styled": {
+      "optional": false
+    }
+  },
+  "devDependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@vitejs/plugin-react": "^5.1.0",
+    "jsdom": "^22.1.0",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ameshkin/nextcrumbs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ameshkin/nextcrumbs/issues"
+  },
+  "homepage": "https://github.com/ameshkin/nextcrumbs#readme",
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/ameshkin"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "mui",
+    "breadcrumbs",
+    "nextjs",
+    "react",
+    "NEXT",
+    "material-ui",
+    "seo",
+    "schema.org",
+    "app router"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "next": "^16.0.1"
+  }
+}
