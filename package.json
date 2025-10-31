@@ -12,7 +12,8 @@
     "clean": "rimraf dist",
     "build": "tsup",
     "test": "vitest",
-    "typecheck": "tsc --noEmit",
+    "test:run": "vitest run",
+    "typecheck": "tsc -p tsconfig.build.json --noEmit",
     "release:pre": "npm run typecheck && npm run test && npm run build",
     "release:patch": "npm run release:pre && npm version patch -m \"chore(release): %s\" && git push && git push --tags && npm publish --access public",
     "publish:patch": "npm run release:patch"
@@ -40,8 +41,12 @@
   "devDependencies": {
     "@testing-library/jest-dom": "^6.4.2",
     "@testing-library/react": "^16.3.0",
+    "@types/jest": "^30.0.0",
     "@vitejs/plugin-react": "^5.1.0",
+    "i": "^0.3.7",
     "jsdom": "^22.1.0",
+    "npm": "^11.6.2",
+    "or": "^0.2.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "tsup": "^8.5.0",
