@@ -11,7 +11,7 @@ export default function Link({ href, children, ...rest }: LinkProps) {
   const to = typeof href === "string" ? href : href?.pathname || "/";
   return (
     <a href={to} {...rest}>
-  {children}
-  </a>
-);
+      {children}
+    </a>
+  );
 }

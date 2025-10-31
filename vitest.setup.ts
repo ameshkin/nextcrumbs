@@ -1,10 +1,7 @@
+import { expect, vi } from "vitest";
 import "@testing-library/jest-dom";
 
-import { vi } from "vitest";
-
-// Example: minimal next/navigation mocks if you need them in tests
-vi.mock("next/navigation", () => {
-  return {
-    usePathname: () => "/products/new",
-  };
+vi.mock("next/link", async () => {
+  const mod = await import("./src/mocks/nextLinkMock");
+  return { default: mod.default };
 });
