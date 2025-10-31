@@ -1,6 +1,6 @@
 {
   "name": "@ameshkin/nextcrumbs",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "MUI 7 breadcrumbs with Next.js Link support, optional URL auto-generation, and SEO microdata.",
   "license": "MIT",
   "type": "module",
@@ -9,13 +9,13 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "tsup",
     "clean": "rimraf dist",
-    "prepublishOnly": "npm run build",
-    "prepare": "npm run build",
-    "typecheck": "tsc --noEmit",
+    "build": "tsup",
     "test": "vitest",
-    "test:watch": "vitest --watch"
+    "typecheck": "tsc --noEmit",
+    "release:pre": "npm run typecheck && npm run test && npm run build",
+    "release:patch": "npm run release:pre && npm version patch -m \"chore(release): %s\" && git push && git push --tags && npm publish --access public",
+    "publish:patch": "npm run release:patch"
   },
   "exports": {
     ".": {
@@ -33,7 +33,20 @@
     "@emotion/react": ">=11",
     "@emotion/styled": ">=11",
     "@mui/icons-material": ">=7",
-    "@mui/material": ">=7"
+    "@mui/material": ">=7",
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "devDependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/jest-dom": "^6.4.2",
+    "vitest": "^4.0.5",
+    "jsdom": "^22.1.0",
+    "@vitejs/plugin-react": "^5.1.0",
+    "typescript": "^5.9.3",
+    "tsup": "^8.5.0"
   },
   "peerDependenciesMeta": {
     "@emotion/react": {
@@ -42,17 +55,6 @@
     "@emotion/styled": {
       "optional": false
     }
-  },
-  "devDependencies": {
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.0",
-    "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.0",
-    "@vitejs/plugin-react": "^5.1.0",
-    "jsdom": "^22.1.0",
-    "tsup": "^8.5.0",
-    "typescript": "^5.9.3",
-    "vitest": "^4.0.5"
   },
   "repository": {
     "type": "git",
@@ -74,7 +76,6 @@
     "breadcrumbs",
     "nextjs",
     "react",
-    "NEXT",
     "material-ui",
     "seo",
     "schema.org",
@@ -82,8 +83,5 @@
   ],
   "publishConfig": {
     "access": "public"
-  },
-  "dependencies": {
-    "next": "^16.0.1"
   }
 }

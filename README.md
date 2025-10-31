@@ -1,19 +1,19 @@
 # Next Crumb
 
-> > MUI 7 Breadcrumbs with **Next.js Link** support, optional **URL-based generation**, and **SEO microdata**. Router-agnostic, zero runtime deps.
+> MUI 7 Breadcrumbs with **Next.js Link** support, optional **URL-based generation**, and **SEO microdata**. Router-agnostic, zero runtime deps.
 
-| Item                  | Value                                                                                                    |
-| --------------------- | -------------------------------------------------------------------------------------------------------- |
-| **GitHub repo**       | `https://github.com/ameshkin/nextcrumbs`                                                                |
-| **npm package name**  | `@ameshkin/nextcrumbs`                                                                                  |
-| **Install**           | `npm i @ameshkin/nextcrumbs`                                                                            |
-| **Peer deps**         | `@mui/material@^7`, `@mui/icons-material@^7`, `react@>=18`, `react-dom@>=18`                             |
-| **CI badge**          | `https://img.shields.io/github/actions/workflow/status/ameshkin/nextcrumbs/ci.yml?branch=main&label=CI` |
-| **npm badge**         | `https://img.shields.io/npm/v/@ameshkin/nextcrumbs.svg`                                                 |
-| **Types badge**       | `https://img.shields.io/badge/types-TypeScript-blue.svg`                                                 |
-| **License badge**     | `https://img.shields.io/badge/license-MIT-black.svg`                                                     |
-| **Bundle size badge** | `https://img.shields.io/bundlephobia/minzip/@ameshkin/nextcrumbs`                                       |
-| **Deps badge**        | `https://img.shields.io/librariesio/release/npm/@ameshkin/nextcrumbs`                                   |
+| Item                  | Value |
+|-----------------------|-------|
+| **GitHub repo**       | [github.com/ameshkin/nextcrumbs](https://github.com/ameshkin/nextcrumbs) |
+| **npm package name**  | `@ameshkin/nextcrumbs` |
+| **Install**           | `npm i @ameshkin/nextcrumbs` |
+| **Peer deps**         | `@mui/material@^7`, `@mui/icons-material@^7`, `react@>=18`, `react-dom@>=18` |
+| **CI badge**          | [![CI](https://img.shields.io/github/actions/workflow/status/ameshkin/nextcrumbs/ci.yml?branch=main&label=CI)](https://github.com/ameshkin/nextcrumbs/actions) |
+| **npm badge**         | [![npm](https://img.shields.io/npm/v/@ameshkin/nextcrumbs.svg)](https://www.npmjs.com/package/@ameshkin/nextcrumbs) |
+| **Types badge**       | ![types](https://img.shields.io/badge/types-TypeScript-blue.svg) |
+| **License badge**     | [![license](https://img.shields.io/badge/license-MIT-black.svg)](LICENSE) |
+| **Bundle size badge** | [![bundle size](https://img.shields.io/bundlephobia/minzip/%40ameshkin%2Fnextcrumbs?label=bundle%20size)](https://bundlephobia.com/package/@ameshkin/nextcrumbs) |
+| **Deps badge**        | [![deps](https://img.shields.io/librariesio/release/npm/%40ameshkin%2Fnextcrumbs)](https://libraries.io/npm/%40ameshkin%2Fnextcrumbs) |
 
 ---
 

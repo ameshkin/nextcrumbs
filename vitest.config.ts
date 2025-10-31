@@ -1,13 +1,17 @@
-// vitest.config.ts
-import { defineConfig } from 'vitest/config'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from "vitest/config";
+import { fileURLToPath } from "node:url";
 
 export default defineConfig({
-  plugins: [react()],
   test: {
-    environment: 'jsdom',
     globals: true,
-    include: ['src/**/*.test.{ts,tsx}'],
-    setupFiles: './vitest.setup.ts',
+    environment: "jsdom",
+    setupFiles: "./vitest.setup.ts",
+    include: ["src/**/*.test.ts?(x)"], // adjust to your structure
   },
-})
+  resolve: {
+    alias: {
+      // point next/link to your test mock
+      "next/link": fileURLToPath(new URL("./mocks/link.ts", import.meta.url)),
+    },
+  },
+});
