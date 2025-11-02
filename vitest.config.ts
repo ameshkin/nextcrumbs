@@ -1,17 +1,17 @@
-import { defineConfig } from "vitest/config";
-import { fileURLToPath } from "node:url";
+import { defineConfig } from "vitest/config"
 
 export default defineConfig({
   test: {
-    globals: true,
     environment: "jsdom",
-    setupFiles: "./vitest.setup.ts",
-    include: ["src/**/*.test.ts?(x)"], // adjust to your structure
+    globals: true,
+    setupFiles: ["./vitest.setup.ts"],
+    include: ["src/**/*.test.ts", "src/**/*.test.tsx"]
+  },
+  esbuild: {
+    jsx: "automatic",
+    jsxImportSource: "react"
   },
   resolve: {
-    alias: {
-      // point next/link to your test mock
-      "next/link": fileURLToPath(new URL("./mocks/link.ts", import.meta.url)),
-    },
-  },
-});
+    conditions: ["browser", "module", "import", "default"]
+  }
+})
