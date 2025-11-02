@@ -1,6 +1,6 @@
 {
   "name": "@ameshkin/nextcrumbs",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "MUI 7 breadcrumbs with Next.js Link support, optional URL auto-generation, and SEO microdata.",
   "license": "MIT",
   "type": "module",
@@ -8,88 +8,58 @@
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "scripts": {
-    "clean": "rimraf dist",
-    "build": "tsup",
-    "test": "vitest",
-    "test:run": "vitest run",
-    "typecheck": "tsc -p tsconfig.build.json --noEmit",
-    "release:pre": "npm run typecheck && npm run test && npm run build",
-    "release:patch": "npm run release:pre && npm version patch -m \"chore(release): %s\" && git push && git push --tags && npm publish --access public",
-    "publish:patch": "npm run release:patch"
-  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     }
   },
-  "files": [
-    "dist",
-    "README.md",
-    "LICENSE"
-  ],
+  "files": ["dist", "README.md", "LICENSE"],
   "sideEffects": false,
+  "scripts": {
+    "clean": "tsup --clean",
+    "build": "tsup",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "typecheck": "tsc -p tsconfig.build.json --noEmit",
+    "release:pre": "npm run typecheck && npm run test -- --run && npm run build",
+    "release:patch": "npm run release:pre && npm version patch -m \"chore(release): %s\" && git push && git push --tags && npm publish --access public",
+    "publish:patch": "npm run release:patch"
+  },
   "peerDependencies": {
     "@emotion/react": ">=11",
     "@emotion/styled": ">=11",
-    "@mui/icons-material": "^7.3.4",
-    "@mui/material": "^7.3.4",
+    "@mui/icons-material": ">=7",
+    "@mui/material": ">=7",
     "react": ">=18",
-    "react-dom": ">=18"
-  },
-  "devDependencies": {
-    "@testing-library/jest-dom": "^6.4.2",
-    "@testing-library/react": "^16.3.0",
-    "@types/jest": "^30.0.0",
-    "@vitejs/plugin-react": "^5.1.0",
-    "i": "^0.3.7",
-    "jsdom": "^22.1.0",
-    "npm": "^11.6.2",
-    "or": "^0.2.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "tsup": "^8.5.0",
-    "typescript": "^5.9.3",
-    "vitest": "^4.0.5"
+    "react-dom": ">=18",
+    "react-router-dom": ">=6 || >=7"
   },
   "peerDependenciesMeta": {
-    "@emotion/react": {
-      "optional": false
-    },
-    "@emotion/styled": {
-      "optional": false
-    }
+    "@emotion/react": { "optional": false },
+    "@emotion/styled": { "optional": false },
+    "react-router-dom": { "optional": true }
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "jsdom": "^22.1.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^7.9.5",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.6"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ameshkin/nextcrumbs.git"
   },
-  "bugs": {
-    "url": "https://github.com/ameshkin/nextcrumbs/issues"
-  },
+  "bugs": { "url": "https://github.com/ameshkin/nextcrumbs/issues" },
   "homepage": "https://github.com/ameshkin/nextcrumbs#readme",
-  "funding": {
-    "type": "github",
-    "url": "https://github.com/sponsors/ameshkin"
-  },
-  "engines": {
-    "node": ">=18.0.0"
-  },
-  "keywords": [
-    "mui",
-    "breadcrumbs",
-    "nextjs",
-    "react",
-    "material-ui",
-    "seo",
-    "schema.org",
-    "app router"
-  ],
-  "publishConfig": {
-    "access": "public"
-  },
-  "dependencies": {
-    "@ameshkin/nextcrumbs": "^0.0.4"
-  }
+  "funding": { "type": "github", "url": "https://github.com/sponsors/ameshkin" },
+  "engines": { "node": ">=20.19 <21 || >=22.12" },
+  "packageManager": "npm@10.5.0",
+  "keywords": ["mui", "breadcrumbs", "nextjs", "react", "material-ui", "seo", "schema.org", "app router"],
+  "publishConfig": { "access": "public" }
 }
