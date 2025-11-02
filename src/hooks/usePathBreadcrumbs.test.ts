@@ -1,5 +1,5 @@
 import { renderHook } from "@testing-library/react";
-import { usePathBreadcrumbs } from "../src/usePathBreadcrumbs";
+import { usePathBreadcrumbs } from "./usePathBreadcrumbs";
 
 describe("usePathBreadcrumbs", () => {
   it("generates correct breadcrumbs from path", () => {
