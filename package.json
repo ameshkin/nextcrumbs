@@ -14,7 +14,11 @@
       "default": "./dist/index.js"
     }
   },
-  "files": ["dist", "README.md", "LICENSE"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "sideEffects": false,
   "scripts": {
     "clean": "tsup --clean",
@@ -36,9 +40,15 @@
     "react-router-dom": ">=6 || >=7"
   },
   "peerDependenciesMeta": {
-    "@emotion/react": { "optional": false },
-    "@emotion/styled": { "optional": false },
-    "react-router-dom": { "optional": true }
+    "@emotion/react": {
+      "optional": false
+    },
+    "@emotion/styled": {
+      "optional": false
+    },
+    "react-router-dom": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",
@@ -46,7 +56,7 @@
     "jsdom": "^22.1.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^7.9.5",
+    "react-router-dom": "^7.9.6",
     "tsup": "^8.5.0",
     "typescript": "^5.9.3",
     "vitest": "^4.0.6"
@@ -55,11 +65,30 @@
     "type": "git",
     "url": "git+https://github.com/ameshkin/nextcrumbs.git"
   },
-  "bugs": { "url": "https://github.com/ameshkin/nextcrumbs/issues" },
+  "bugs": {
+    "url": "https://github.com/ameshkin/nextcrumbs/issues"
+  },
   "homepage": "https://github.com/ameshkin/nextcrumbs#readme",
-  "funding": { "type": "github", "url": "https://github.com/sponsors/ameshkin" },
-  "engines": { "node": ">=20.19 <21 || >=22.12" },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/ameshkin"
+  },
+  "engines": {
+    "node": ">=20.19 <21 || >=22.12"
+  },
   "packageManager": "npm@10.5.0",
-  "keywords": ["mui", "breadcrumbs", "nextjs", "react", "material-ui", "seo", "schema.org", "app router", "react router"],
-  "publishConfig": { "access": "public" }
+  "keywords": [
+    "mui",
+    "breadcrumbs",
+    "nextjs",
+    "react",
+    "material-ui",
+    "seo",
+    "schema.org",
+    "app router",
+    "react router"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }
