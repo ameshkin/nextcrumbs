@@ -1,6 +1,6 @@
 {
   "name": "@ameshkin/nextcrumbs",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "MUI 7 breadcrumbs with Next.js Link support, optional URL auto-generation, and SEO microdata.",
   "license": "MIT",
   "type": "module",
