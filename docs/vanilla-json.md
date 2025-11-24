@@ -79,14 +79,6 @@ export default function DocsPage() {
 }
 ```
 
-## Microdata via component
-
-`<Breadcrumbs>` ships with `withSchema` enabled by default. To disable microdata (for example, if you only want JSON-LD), set:
-
-```tsx
-<Breadcrumbs withSchema={false} items={[ /* ... */ ]} />
-```
-
 ## Styling and density
 
 Pass any MUI Breadcrumbs props through `muiProps`:
@@ -127,5 +119,5 @@ it("renders a non-link last crumb", () => {
 
 ## Tips
 
-* Prefer **page-level JSON-LD** for static SEO and keep `withSchema` for helpful in-markup hints (or disable it if you want JSON-LD only).
+* Prefer **page-level JSON-LD** for static SEO markup (see example above).
 * Keep labels human-readable; reserve slugs for `href`.

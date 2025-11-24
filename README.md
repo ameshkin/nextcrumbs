@@ -40,8 +40,8 @@
 * ✅ **MUI** Breadcrumbs under the hood (accessible, stable)
 * ✅ **Next.js** ready via pluggable `LinkComponent` (e.g., `next/link`)
 * ✅ Optional **URL → items** helper for App Router (`usePathBreadcrumbs`)
-* ✅ **React Router** helper hook (`useReactRouterBreadcrumbs`)
-* ✅ Built-in **schema.org/BreadcrumbList** microdata via `withSchema`
+* ✅ **React Router** helper hook (`useReactRouterBreadcrumbs`) - optional dependency
+* ✅ Fully typed with TypeScript
 
 ---
 
@@ -108,6 +108,7 @@ export default function AutoTrail() {
   const pathname = usePathname();
   const items = usePathBreadcrumbs(pathname, {
     baseHref: "/",
+    rootLabel: "Home",
     labelMap: { new: "Create" },
     exclude: ["_private"]
   });
@@ -164,12 +165,14 @@ export default function Demo() {
 
 ### `usePathBreadcrumbs(pathname, options?)`
 
-| Option     | Type                    | Default | Description                        |
-| ---------- | ----------------------- | ------- | ---------------------------------- |
-| `baseHref` | `string`                | `"/"`   | Root href for the first crumb.     |
-| `labelMap` | `Record<string,string>` | `{}`    | Override labels by URL segment.    |
-| `exclude`  | `string[]`              | `[]`    | Skip specific segments.            |
-| `decode`   | `boolean`               | `true`  | `decodeURIComponent` each segment. |
+| Option         | Type                    | Default      | Description                        |
+| -------------- | ----------------------- | ------------ | ---------------------------------- |
+| `baseHref`     | `string`                | `"/"`        | Root href for the first crumb.     |
+| `labelMap`     | `Record<string,string>` | `{}`         | Override labels by URL segment.    |
+| `exclude`      | `string[]`              | `[]`         | Skip specific segments.            |
+| `decode`       | `boolean`               | `true`       | `decodeURIComponent` each segment. |
+| `rootLabel`    | `string`                | `"Dashboard"`| Label for the root/home breadcrumb. |
+| `transformLabel` | `(segment: string) => string` | — | Custom label formatter function. |
 
 ### `useReactRouterBreadcrumbs(options?)`
 
@@ -210,7 +213,41 @@ import { Breadcrumbs } from "@ameshkin/nextcrumbs";
 * Minimal DOM footprint; sensible defaults for current page vs. links.
 * Follows ARIA best practices for breadcrumb navigation.
 
-> Prefer **page-level JSON-LD** for static SEO markup. See: [`docs/vanilla-json.md`](./docs/vanilla-json.md)
+### JSON-LD Structured Data
+
+For SEO, you can add JSON-LD structured data using the built-in utilities:
+
+```tsx
+import { Breadcrumbs, BreadcrumbJsonLd, breadcrumbsToJsonLd } from "@ameshkin/nextcrumbs";
+
+function MyPage() {
+  const items = [
+    { label: "Home", href: "/" },
+    { label: "Products", href: "/products" },
+    { label: "New Product" }
+  ];
+
+  return (
+    <>
+      <BreadcrumbJsonLd crumbs={breadcrumbsToJsonLd(items)} origin="https://example.com" />
+      <Breadcrumbs items={items} />
+    </>
+  );
+}
+```
+
+Or use the `toJsonLd` function for custom JSON-LD generation:
+
+```tsx
+import { toJsonLd } from "@ameshkin/nextcrumbs";
+
+const jsonLd = toJsonLd(
+  [{ name: "Home", href: "/" }, { name: "Products" }],
+  { origin: "https://example.com" }
+);
+```
+
+> See [`docs/vanilla-json.md`](./docs/vanilla-json.md) for more examples.
 
 ---
 

@@ -105,8 +105,7 @@ type PathOptions = {
 ## Accessibility & SEO
 
 * `<Breadcrumbs aria-label="breadcrumbs">` for screen readers
-* `withSchema` is enabled by default to add `schema.org/BreadcrumbList`
-* For JSON-LD, add page-level `<script type="application/ld+json">` in your layout if you prefer static SEO markup
+* For JSON-LD, add page-level `<script type="application/ld+json">` in your layout if you prefer static SEO markup (see [`docs/vanilla-json.md`](./vanilla-json.md))
 
 ## Theming
 
