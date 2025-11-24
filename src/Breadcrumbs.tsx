@@ -97,7 +97,7 @@ export default function Breadcrumbs({
   }) => (
     <Box component="span" sx={sxJoin(defaultContentSx, contentSx)} title={title || label}>
       {icon && <Box component="span" sx={iconSx}>{icon}</Box>}
-      <Box component="span" sx={labelSx}>{label}</Box>
+      <Typography component="span" sx={labelSx}>{label}</Typography>
     </Box>
   );
 
