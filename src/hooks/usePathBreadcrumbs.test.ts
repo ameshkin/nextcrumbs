@@ -30,4 +30,30 @@ describe("usePathBreadcrumbs", () => {
       { label: "Edit" },
     ]);
   });
+
+  it("uses custom rootLabel", () => {
+    const { result } = renderHook(() =>
+      usePathBreadcrumbs("/products/new", {
+        rootLabel: "Home",
+      })
+    );
+
+    expect(result.current).toEqual([
+      { label: "Home", href: "/" },
+      { label: "Products", href: "/products" },
+      { label: "New" },
+    ]);
+  });
+
+  it("handles empty pathname with custom rootLabel", () => {
+    const { result } = renderHook(() =>
+      usePathBreadcrumbs("/", {
+        rootLabel: "Home",
+      })
+    );
+
+    expect(result.current).toEqual([
+      { label: "Home" },
+    ]);
+  });
 });

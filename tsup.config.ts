@@ -8,5 +8,5 @@ export default defineConfig({
   clean: true,
   treeshake: true,
   target: "es2020",
-  external: ["react", "react-dom", "@mui/material", "@mui/icons-material", "react-router-dom"]
+  external: ["react", "react-dom", "@mui/material", "@mui/icons-material"]
 });
