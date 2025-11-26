@@ -18,6 +18,35 @@ export type JsonLdOptions = {
   origin?: string;
 };
 
+const DANGEROUS_PROPERTY_NAMES = new Set(["__proto__", "constructor", "prototype"]);
+
+function isSafeName(name: unknown): name is string {
+  return typeof name === "string" && !DANGEROUS_PROPERTY_NAMES.has(name);
+}
+
+function safeCrumbs(input: unknown): JsonLdBreadcrumb[] {
+  if (!Array.isArray(input)) return [];
+  return input
+    .filter((c): c is JsonLdBreadcrumb => !!c && typeof c === "object" && isSafeName((c as any).name))
+    .map((c) => ({
+      name: (c as any).name as string,
+      href: typeof (c as any).href === "string" ? (c as any).href : undefined,
+    }));
+}
+
+function safeStringify(value: unknown): string {
+  try {
+    return JSON.stringify(value);
+  } catch {
+    // Fallback to an empty BreadcrumbList if something goes wrong
+    return JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [],
+    });
+  }
+}
+
 /**
  * Converts an array of breadcrumb items into JSON-LD structured data
  * following the schema.org BreadcrumbList specification.
@@ -41,7 +70,7 @@ export type JsonLdOptions = {
  * ```
  */
 export function toJsonLd(
-  crumbs: JsonLdBreadcrumb[],
+  crumbs: JsonLdBreadcrumb[] | unknown,
   options: JsonLdOptions = {}
 ): {
   "@context": "https://schema.org";
@@ -55,10 +84,12 @@ export function toJsonLd(
 } {
   const { origin = "https://example.com" } = options;
 
+  const safe = safeCrumbs(crumbs);
+
   return {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
-    itemListElement: crumbs.map((crumb, index) => {
+    itemListElement: safe.map((crumb, index) => {
       const item: {
         "@type": "ListItem";
         position: number;
@@ -115,13 +146,13 @@ export function BreadcrumbJsonLd({
   crumbs,
   origin = "https://example.com",
 }: {
-  crumbs: JsonLdBreadcrumb[];
+  crumbs: JsonLdBreadcrumb[] | unknown;
   origin?: string;
 }): React.JSX.Element {
   const json = React.useMemo(() => toJsonLd(crumbs, { origin }), [crumbs, origin]);
   return React.createElement("script", {
     type: "application/ld+json",
-    dangerouslySetInnerHTML: { __html: JSON.stringify(json) },
+    dangerouslySetInnerHTML: { __html: safeStringify(json) },
   });
 }
 
@@ -152,10 +183,11 @@ export function BreadcrumbJsonLd({
  * }
  * ```
  */
-export function breadcrumbsToJsonLd(items: BreadcrumbItem[]): JsonLdBreadcrumb[] {
+export function breadcrumbsToJsonLd(items: BreadcrumbItem[] | unknown): JsonLdBreadcrumb[] {
+  if (!Array.isArray(items)) return [];
   return items.map((item) => ({
-    name: item.label,
-    href: item.href,
+    name: String((item as BreadcrumbItem).label),
+    href: (item as BreadcrumbItem).href,
   }));
 }
 

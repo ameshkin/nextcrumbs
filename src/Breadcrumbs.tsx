@@ -108,7 +108,8 @@ export default function Breadcrumbs({
                                       iconSx,
                                       labelSx,
                                     }: BreadcrumbsProps) {
-  const lastIndex = items.length - 1;
+  const safeItems = Array.isArray(items) ? items : [];
+  const lastIndex = safeItems.length - 1;
 
   const defaultRootSx: SxProps<Theme> = {
     mb: 2,
@@ -193,7 +194,7 @@ export default function Breadcrumbs({
       sx={sxJoin(defaultRootSx, sx)}
       {...muiProps}
     >
-      {items.map(renderCrumb)}
+      {safeItems.map(renderCrumb)}
     </MUIBreadcrumbs>
   );
 }

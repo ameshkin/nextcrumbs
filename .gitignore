@@ -1,3 +1,9 @@
 .idea
 dist
 node_modules
+.cursor
+.cursorrules
+.nvmrc
+.progress
+.vscode
+.orchestrator

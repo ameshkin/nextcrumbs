@@ -45,6 +45,8 @@
     "build": "tsup",
     "test": "vitest",
     "test:run": "vitest run",
+    "test:e2e:ui": "playwright test",
+    "test:e2e:bdd": "cucumber-js \"tests/e2e/features/**/*.feature\" --require \"tests/e2e/steps/**/*.mjs\"",
     "typecheck": "tsc -p tsconfig.build.json --noEmit",
     "release:pre": "npm run typecheck && npm run test -- --run && npm run build",
     "release:patch": "npm run release:pre && npm version patch -m \"chore(release): %s\" && git push && git push --tags && npm publish --access public",
@@ -71,6 +73,8 @@
     }
   },
   "devDependencies": {
+    "@cucumber/cucumber": "^11.2.0",
+    "@playwright/test": "^1.57.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "jsdom": "^22.1.0",

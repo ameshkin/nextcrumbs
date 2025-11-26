@@ -2,13 +2,34 @@
  * Tests for Breadcrumbs component props and edge cases
  */
 
+import * as React from "react";
 import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import Breadcrumbs from "./Breadcrumbs";
 
-function TestLink(props: React.PropsWithChildren<{ href: string; className?: string; rel?: string; target?: string }>) {
-  return <a href={props.href} className={props.className} rel={props.rel} target={props.target}>{props.children}</a>;
-}
+type TestLinkProps = React.PropsWithChildren<{
+  href: string;
+  className?: string;
+  rel?: string;
+  target?: string;
+}>;
+
+const TestLink = React.forwardRef<HTMLAnchorElement, TestLinkProps>(function TestLink(
+  props,
+  ref,
+) {
+  return (
+    <a
+      href={props.href}
+      className={props.className}
+      rel={props.rel}
+      target={props.target}
+      ref={ref}
+    >
+      {props.children}
+    </a>
+  );
+});
 
 describe("Breadcrumbs props and edge cases", () => {
   it("handles dense prop", () => {
