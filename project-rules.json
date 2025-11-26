@@ -1,0 +1,27 @@
+{
+  "$schema": "./.orchestrator.schema.json",
+  "packages": {
+    "orchestrator": "packages/orchestrator",
+    "agentHandler": "packages/agent-handler",
+    "nextcrumbs": "packages/nextcrumbs",
+    "payloadPatrol": "packages/payload-patrol",
+    "jiraMate": "packages/jira-mate",
+    "jiraMateUi": "packages/jira-mate-ui"
+  },
+  "features": {
+    "bugs": true,
+    "jiraIntegration": true,
+    "uiBuilder": true,
+    "routeGeneration": true
+  },
+  "ui": {
+    "sections": [
+      "rules",
+      "bugs",
+      "jira",
+      "packages",
+      "routes"
+    ]
+  }
+}
+

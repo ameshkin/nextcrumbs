@@ -1,0 +1,28 @@
+{
+  "autoAccept": {
+    "enabled": true,
+    "fileEdits": true,
+    "fileCreations": true,
+    "fileDeletions": true,
+    "documentation": true,
+    "testFiles": true,
+    "configFiles": true,
+    "sourceFiles": true,
+    "buildFiles": true
+  },
+  "confirmEdits": false,
+  "requireConfirmation": false,
+  "patterns": {
+    "autoAccept": [
+      "**/*"
+    ],
+    "alwaysConfirm": []
+  },
+  "workflow": {
+    "preferCompleteImplementations": true,
+    "includeFixesInCommits": true,
+    "ensureExamplesAreAccurate": true,
+    "skipConfirmation": true
+  }
+}
+
