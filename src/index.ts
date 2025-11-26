@@ -1,3 +1,6 @@
+// Primary export as NextCrumb
+export { default as NextCrumb } from "./Breadcrumbs"
+// Alias for backward compatibility
 export { default as Breadcrumbs } from "./Breadcrumbs"
 export type { BreadcrumbsProps, BreadcrumbItem } from "./Breadcrumbs"
 

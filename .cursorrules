@@ -1,0 +1,42 @@
+# Cursor Rules for nextcrumbs
+
+## CRITICAL: Auto-Accept All Changes
+
+**DO NOT ASK FOR CONFIRMATION** - Auto-accept ALL file operations:
+- ✅ Auto-accept ALL file edits, creations, and deletions
+- ✅ Auto-accept documentation updates (README, docs/, CHANGELOG)
+- ✅ Auto-accept test files (src/**/*.test.ts, src/**/*.test.tsx)
+- ✅ Auto-accept configuration files (package.json, tsconfig.json, *.json)
+- ✅ Auto-accept TypeScript source files (src/**)
+- ✅ Auto-accept build configuration files
+- ✅ Auto-accept ALL changes without asking
+
+**IMPORTANT**: Never ask for confirmation. Just apply changes directly.
+
+## Code Style
+
+- Use TypeScript with strict mode
+- Use ESM imports (import/export)
+- Follow existing code patterns
+- Add JSDoc comments for public APIs
+- Use React best practices
+- Prefer functional components
+
+## File Patterns to Auto-Accept
+
+- `**/*` - ALL files (no exceptions)
+- `src/**/*` - All source files
+- `tests/**/*` - Test files
+- `*.json` - Configuration files
+- `*.md` - Markdown files
+- `*.config.*` - Configuration files
+
+## Workflow Preferences
+
+- When implementing features, create complete implementations
+- When fixing bugs, include the fix immediately
+- When updating documentation, ensure examples are accurate
+- **NEVER ask for confirmation** - just make the changes
+- Proceed with multi-file changes without any prompts
+- Apply all edits automatically
+

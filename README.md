@@ -76,11 +76,12 @@ npm i react-router-dom
 ```tsx
 "use client";
 import Link from "next/link";
-import { Breadcrumbs } from "@ameshkin/nextcrumbs";
+import { NextCrumb } from "@ameshkin/nextcrumbs";
+// Also available as: import { Breadcrumbs } from "@ameshkin/nextcrumbs";
 
 export default function HeaderTrail() {
   return (
-    <Breadcrumbs
+    <NextCrumb
       LinkComponent={Link}
       items={[
         { label: "Dashboard", href: "/" },
