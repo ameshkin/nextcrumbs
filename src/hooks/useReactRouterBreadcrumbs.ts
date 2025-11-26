@@ -125,7 +125,8 @@ export type ReactRouterBreadcrumbsOptions = {
 
 export function useReactRouterBreadcrumbs(options?: ReactRouterBreadcrumbsOptions): BreadcrumbItem[] {
   const useLocation = getUseLocation()
-  const { pathname } = useLocation()
+  const loc = useLocation() as any
+  const pathname: string = typeof loc?.pathname === "string" ? loc.pathname : "/"
   const { rootLabel, basePath, decode = true, exclude = [], mapSegmentLabel } = options || {}
 
   return React.useMemo(() => {
@@ -135,7 +136,15 @@ export function useReactRouterBreadcrumbs(options?: ReactRouterBreadcrumbsOption
     const raw = path === "/" ? [] : path.replace(/\/+$/,"").split("/").filter(Boolean)
 
     const isExcluded = (seg: string) =>
-      exclude.some(x => (typeof x === "string" ? x === seg : x.test(seg)))
+      exclude.some((x) => {
+        if (typeof x === "string") return x === seg
+        try {
+          return x.test(seg)
+        } catch {
+          // Treat invalid/mutated regex as non-matching
+          return false
+        }
+      })
 
     const format = (seg: string) => {
       let s: string;
@@ -160,7 +169,17 @@ export function useReactRouterBreadcrumbs(options?: ReactRouterBreadcrumbsOption
     let acc = basePath && basePath !== "/" ? basePath.replace(/\/+$/,"") : ""
     segments.forEach((seg, i) => {
       acc += `/${seg}`
-      const label = mapSegmentLabel ? mapSegmentLabel(seg, i, segments) : format(seg)
+      let label: string | null
+      if (mapSegmentLabel) {
+        try {
+          label = mapSegmentLabel(seg, i, segments)
+        } catch {
+          // If user callback throws, fall back to default formatter
+          label = format(seg)
+        }
+      } else {
+        label = format(seg)
+      }
       if (label === null) return
       const isLast = i === segments.length - 1
       items.push(isLast ? { label } : { label, href: acc || "/" })

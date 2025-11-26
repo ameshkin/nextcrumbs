@@ -27,6 +27,7 @@
 * [Props](#props)
 * [Icon & Separator Examples](#icon--separator-examples)
 * [Accessibility & SEO](#accessibility--seo)
+* [Docs](#docs)
 * [Dependency Checks](#dependency-checks)
 * [Troubleshooting](#troubleshooting)
 * [FAQ](#faq)
@@ -249,6 +250,25 @@ const jsonLd = toJsonLd(
 ```
 
 > See [`docs/vanilla-json.md`](./docs/vanilla-json.md) for more examples.
+
+---
+
+## Docs
+
+- **Next.js App Router guide**: `docs/next-router.md`  
+  Deep dive into `usePathBreadcrumbs` with Next App Router, theming, and testing tips.
+
+- **React Router guide**: `docs/react-router.md`  
+  How to use `useReactRouterBreadcrumbs`, wire up `<Link>` for SPA navigation, and test with RTL.
+
+- **Vanilla React + JSON-LD**: `docs/vanilla-json.md`  
+  Using `<Breadcrumbs />` without any router and adding SEO JSON-LD at the page level.
+
+- **GitLab / subpath exports**: `docs/gitlab.md`  
+  How to consume `@ameshkin/nextcrumbs` (and its subpath exports) in GitLab and other CI/CD setups with good tree shaking.
+
+- **Export & API changes**: `docs/changes.md`  
+  Notes on the current export layout, subpath exports, and dependency cleanup.
 
 ---
 

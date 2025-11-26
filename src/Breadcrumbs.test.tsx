@@ -1,14 +1,27 @@
 // src/Breadcrumbs.test.tsx
+import * as React from "react";
 import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import Breadcrumbs from "./Breadcrumbs";
 
-// Simple Link stub for tests (no dependency on next/link)
-function TestLink(props: React.PropsWithChildren<{ href: string | { pathname: string }; className?: string }>) {
+type TestLinkProps = React.PropsWithChildren<{
+  href: string | { pathname: string };
+  className?: string;
+}>;
+
+// Simple Link stub for tests (no dependency on next/link), but ref-forwarding
+const TestLink = React.forwardRef<HTMLAnchorElement, TestLinkProps>(function TestLink(
+  props,
+  ref,
+) {
   const to = typeof props.href === "string" ? props.href : props.href?.pathname || "/";
   // eslint-disable-next-line jsx-a11y/anchor-is-valid
-  return <a href={to} className={props.className}>{props.children}</a>;
-}
+  return (
+    <a href={to} className={props.className} ref={ref}>
+      {props.children}
+    </a>
+  );
+});
 
 describe("Breadcrumbs", () => {
   const items = [

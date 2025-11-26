@@ -56,13 +56,16 @@ export function usePathBreadcrumbs(
     rootLabel = "Dashboard",
   }: PathCrumbOptions = {}
 ): PathBreadcrumb[] {
+  const excludeSet = React.useMemo(() => new Set(exclude), [exclude]);
+
   const parts = React.useMemo(() => {
+    if (typeof pathname !== "string") return [] as string[];
     return pathname
       .replace(/^\/+/, "")
       .split("/")
       .filter(Boolean)
-      .filter((seg) => !exclude.includes(seg));
-  }, [pathname, exclude]);
+      .filter((seg) => !excludeSet.has(seg));
+  }, [pathname, excludeSet]);
 
   return React.useMemo(() => {
     const items: PathBreadcrumb[] = [];
@@ -93,10 +96,20 @@ export function usePathBreadcrumbs(
       } else {
         raw = seg;
       }
-      const label =
-        labelMap[seg] ??
-        transformLabel?.(raw) ??
-        raw.replace(/-/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
+      const fallback = raw.replace(/-/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
+      let label: string;
+      if (labelMap[seg] !== undefined) {
+        label = labelMap[seg]!;
+      } else if (transformLabel) {
+        try {
+          label = transformLabel(raw);
+        } catch {
+          // If user callback throws, fall back to safe formatting
+          label = fallback;
+        }
+      } else {
+        label = fallback;
+      }
 
       items.push({
         label,
