@@ -4,6 +4,9 @@
   "description": "MUI 7 breadcrumbs with Next.js Link support, optional URL auto-generation, and SEO microdata.",
   "license": "MIT",
   "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
   "author": "Amir Meshkin <amir.meshkin@gmail.com> (https://github.com/ameshkin)",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -13,6 +16,22 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
+    },
+    "./breadcrumbs": {
+      "types": "./dist/Breadcrumbs.d.ts",
+      "import": "./dist/Breadcrumbs.js"
+    },
+    "./hooks/usePathBreadcrumbs": {
+      "types": "./dist/hooks/usePathBreadcrumbs.d.ts",
+      "import": "./dist/hooks/usePathBreadcrumbs.js"
+    },
+    "./hooks/useReactRouterBreadcrumbs": {
+      "types": "./dist/hooks/useReactRouterBreadcrumbs.d.ts",
+      "import": "./dist/hooks/useReactRouterBreadcrumbs.js"
+    },
+    "./utils/jsonld": {
+      "types": "./dist/utils/jsonld.d.ts",
+      "import": "./dist/utils/jsonld.js"
     }
   },
   "files": [

@@ -5,8 +5,7 @@ Use `useReactRouterBreadcrumbs` to derive breadcrumb items from the current loca
 
 ```tsx
 import { MemoryRouter, Routes, Route } from "react-router-dom"
-import { Breadcrumbs } from "@ameshkin/nextcrumbs"
-import useReactRouterBreadcrumbs from "@ameshkin/nextcrumbs"
+import { Breadcrumbs, useReactRouterBreadcrumbs } from "@ameshkin/nextcrumbs"
 
 function Trail() {
   const items = useReactRouterBreadcrumbs({ rootLabel: "Home" })
@@ -31,8 +30,7 @@ Pass React Router’s `<Link>` as `LinkComponent` so breadcrumb links use client
 
 ```tsx
 import { Link as RouterLink, BrowserRouter, Routes, Route } from "react-router-dom"
-import { Breadcrumbs } from "@ameshkin/nextcrumbs"
-import useReactRouterBreadcrumbs from "@ameshkin/nextcrumbs"
+import { Breadcrumbs, useReactRouterBreadcrumbs } from "@ameshkin/nextcrumbs"
 
 function Trail() {
   const items = useReactRouterBreadcrumbs({ rootLabel: "Home" })
@@ -77,8 +75,7 @@ type ReactRouterBreadcrumbsOptions = {
 
 ```tsx
 import { Link as RouterLink } from "react-router-dom"
-import { Breadcrumbs } from "@ameshkin/nextcrumbs"
-import useReactRouterBreadcrumbs from "@ameshkin/nextcrumbs"
+import { Breadcrumbs, useReactRouterBreadcrumbs } from "@ameshkin/nextcrumbs"
 
 export default function Trail() {
   const items = useReactRouterBreadcrumbs({
@@ -106,8 +103,7 @@ When testing with Vitest/RTL, wrap your component with a memory or browser route
 ```tsx
 import { render, screen } from "@testing-library/react"
 import { MemoryRouter, Routes, Route } from "react-router-dom"
-import { Breadcrumbs } from "@ameshkin/nextcrumbs"
-import useReactRouterBreadcrumbs from "@ameshkin/nextcrumbs"
+import { Breadcrumbs, useReactRouterBreadcrumbs } from "@ameshkin/nextcrumbs"
 
 function Trail() {
   const items = useReactRouterBreadcrumbs({ rootLabel: "Home" })

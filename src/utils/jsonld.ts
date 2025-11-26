@@ -58,12 +58,29 @@ export function toJsonLd(
   return {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
-    itemListElement: crumbs.map((crumb, index) => ({
-      "@type": "ListItem",
-      position: index + 1,
-      name: crumb.name,
-      ...(crumb.href ? { item: new URL(crumb.href, origin).toString() } : {}),
-    })),
+    itemListElement: crumbs.map((crumb, index) => {
+      const item: {
+        "@type": "ListItem";
+        position: number;
+        name: string;
+        item?: string;
+      } = {
+        "@type": "ListItem",
+        position: index + 1,
+        name: crumb.name,
+      };
+      
+      if (crumb.href) {
+        try {
+          item.item = new URL(crumb.href, origin).toString();
+        } catch {
+          // If URL construction fails, skip the item property
+          // This prevents DoS attacks from malformed URLs
+        }
+      }
+      
+      return item;
+    }),
   };
 }
 

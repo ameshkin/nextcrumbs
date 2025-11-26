@@ -65,4 +65,43 @@ describe("useReactRouterBreadcrumbs (hook-only)", () => {
     expect(items.map(i => i.label)).toEqual(["Home", "A", "B"])
     expect(items.map(i => i.href || null)).toEqual(["/", "/a", null])
   })
+
+  it("works with useRRBreadcrumbs alias", async () => {
+    const { useRRBreadcrumbs } = await import("../index.js")
+    function EchoRRItems() {
+      const items = useRRBreadcrumbs({ rootLabel: "Home" })
+      return <div data-testid="rr-json">{JSON.stringify(items)}</div>
+    }
+
+    render(
+      <MemoryRouter initialEntries={["/test/path"]}>
+        <Routes>
+          <Route path="*" element={<EchoRRItems />} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    const json = screen.getByTestId("rr-json").textContent || "[]"
+    const items = JSON.parse(json) as Array<{ label: string; href?: string }>
+    expect(items.map(i => i.label)).toEqual(["Home", "Test", "Path"])
+  })
+
+  it("handles custom rootLabel option", () => {
+    function EchoCustomRoot() {
+      const items = useReactRouterBreadcrumbs({ rootLabel: "Dashboard" })
+      return <div data-testid="custom-root">{JSON.stringify(items)}</div>
+    }
+
+    render(
+      <MemoryRouter initialEntries={["/"]}>
+        <Routes>
+          <Route path="*" element={<EchoCustomRoot />} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    const json = screen.getByTestId("custom-root").textContent || "[]"
+    const items = JSON.parse(json) as Array<{ label: string }>
+    expect(items[0].label).toBe("Dashboard")
+  })
 })

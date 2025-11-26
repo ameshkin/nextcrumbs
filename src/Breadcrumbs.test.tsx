@@ -86,4 +86,40 @@ describe("Breadcrumbs", () => {
     const { container } = render(<Breadcrumbs items={[]} LinkComponent={TestLink} />);
     expect(container.querySelector('[aria-label="Breadcrumb"]')).toBeTruthy();
   });
+
+  it("works with NextCrumb export alias", async () => {
+    const { NextCrumb } = await import("./index.js");
+    render(<NextCrumb items={items} LinkComponent={TestLink} />);
+    expect(screen.getByText("Home")).toBeInTheDocument();
+    expect(screen.getByText("Products")).toBeInTheDocument();
+    expect(screen.getByText("New")).toBeInTheDocument();
+  });
+
+  it("handles items with only href and no label", () => {
+    const itemsWithHrefOnly = [
+      { href: "/" },
+      { label: "Products", href: "/products" },
+    ];
+    render(<Breadcrumbs items={itemsWithHrefOnly} LinkComponent={TestLink} />);
+    // Should render without crashing
+    expect(screen.getByText("Products")).toBeInTheDocument();
+  });
+
+  it("handles single item", () => {
+    const singleItem = [{ label: "Home" }];
+    render(<Breadcrumbs items={singleItem} LinkComponent={TestLink} />);
+    expect(screen.getByText("Home")).toBeInTheDocument();
+    expect(screen.queryAllByRole("link")).toHaveLength(0);
+  });
+
+  it("handles items with title attribute", () => {
+    const itemsWithTitle = [
+      { label: "Home", href: "/", title: "Go to home page" },
+      { label: "Products", href: "/products" },
+    ];
+    render(<Breadcrumbs items={itemsWithTitle} LinkComponent={TestLink} />);
+    const homeLink = screen.getByText("Home").closest("a");
+    // Title should be passed through LinkComponent
+    expect(homeLink).toBeTruthy();
+  });
 });

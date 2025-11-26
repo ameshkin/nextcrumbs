@@ -157,7 +157,8 @@ export default function Breadcrumbs({
     const isHome = item.href === "/" || item.label.toLowerCase() === homeLabel.toLowerCase();
     const icon = item.icon ?? (isHome ? <HomeIcon color="primary" sx={{ fontSize: 18 }} /> : null);
     const label = isHome ? homeLabel : item.label;
-    const key = item.href || item.label;
+    // Use index in key to prevent collisions when multiple items have same href/label
+    const key = `${index}-${item.href || item.label}`;
 
     if (isLink) {
       return (
