@@ -138,7 +138,17 @@ export function useReactRouterBreadcrumbs(options?: ReactRouterBreadcrumbsOption
       exclude.some(x => (typeof x === "string" ? x === seg : x.test(seg)))
 
     const format = (seg: string) => {
-      const s = decode ? decodeURIComponent(seg) : seg
+      let s: string;
+      if (decode) {
+        try {
+          s = decodeURIComponent(seg);
+        } catch {
+          // If decoding fails (malformed URI), use original segment
+          s = seg;
+        }
+      } else {
+        s = seg;
+      }
       return s.replace(/[-_]+/g, " ").replace(/\b\w/g, c => c.toUpperCase())
     }
 
@@ -158,7 +168,7 @@ export function useReactRouterBreadcrumbs(options?: ReactRouterBreadcrumbsOption
 
     if (!rootLabel && items.length === 0) items.push({ label: "Home", href: "/" })
     return items
-  }, [pathname, rootLabel, basePath, decode, JSON.stringify(exclude), mapSegmentLabel])
+  }, [pathname, rootLabel, basePath, decode, exclude, mapSegmentLabel])
 }
 
 export default useReactRouterBreadcrumbs

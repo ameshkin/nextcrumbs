@@ -82,7 +82,17 @@ export function usePathBreadcrumbs(
       href += `/${seg}`;
       href = href.replace(/\/+/g, "/");
 
-      const raw = decode ? decodeURIComponent(seg) : seg;
+      let raw: string;
+      if (decode) {
+        try {
+          raw = decodeURIComponent(seg);
+        } catch {
+          // If decoding fails (malformed URI), use original segment
+          raw = seg;
+        }
+      } else {
+        raw = seg;
+      }
       const label =
         labelMap[seg] ??
         transformLabel?.(raw) ??
@@ -95,5 +105,5 @@ export function usePathBreadcrumbs(
     });
 
     return items;
-  }, [parts, baseHref, labelMap, decode, transformLabel]);
+  }, [parts, baseHref, labelMap, decode, transformLabel, rootLabel]);
 }
