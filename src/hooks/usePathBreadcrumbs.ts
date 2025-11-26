@@ -8,27 +8,42 @@ export type PathBreadcrumb = {
 };
 
 export type PathCrumbOptions = {
+  /** Starting path prefix for the first crumb (default: "/") */
   baseHref?: string;
+  /** Custom label overrides per URL segment */
   labelMap?: Record<string, string>;
+  /** Segment values to omit from the breadcrumb trail */
   exclude?: string[];
+  /** Whether to decode URI segments using decodeURIComponent (default: true) */
   decode?: boolean;
+  /** Optional custom label formatter function for each segment */
   transformLabel?: (segment: string) => string;
+  /** Label for the root/home breadcrumb item (default: "Dashboard") */
+  rootLabel?: string;
 };
 
 /**
- * usePathBreadcrumbs
- *
  * Converts a Next.js pathname into an array of breadcrumb items.
  *
- * @param pathname - Current pathname (e.g. from usePathname()).
- * @param options - Configuration options:
- *   - baseHref: Starting path prefix (default "/")
- *   - labelMap: Custom label overrides per segment
- *   - exclude: Segment values to omit from trail
- *   - decode: Whether to decode URI segments (default true)
- *   - transformLabel: Optional custom label formatter
+ * @param pathname - Current pathname (e.g., from `usePathname()` in Next.js App Router)
+ * @param options - Configuration options for customizing the breadcrumb generation
+ * @returns Array of breadcrumb items with `label` and optional `href` properties
  *
- * @returns Array of { label, href? } objects to be consumed by <Breadcrumbs />
+ * @example
+ * ```tsx
+ * import { usePathname } from "next/navigation";
+ * import { usePathBreadcrumbs } from "@ameshkin/nextcrumbs";
+ *
+ * function MyBreadcrumbs() {
+ *   const pathname = usePathname();
+ *   const items = usePathBreadcrumbs(pathname, {
+ *     rootLabel: "Home",
+ *     labelMap: { "products": "Products", "new": "Create New" },
+ *     exclude: ["_private"]
+ *   });
+ *   return <Breadcrumbs items={items} />;
+ * }
+ * ```
  */
 export function usePathBreadcrumbs(
   pathname: string,
@@ -38,15 +53,19 @@ export function usePathBreadcrumbs(
     exclude = [],
     decode = true,
     transformLabel,
+    rootLabel = "Dashboard",
   }: PathCrumbOptions = {}
 ): PathBreadcrumb[] {
+  const excludeSet = React.useMemo(() => new Set(exclude), [exclude]);
+
   const parts = React.useMemo(() => {
+    if (typeof pathname !== "string") return [] as string[];
     return pathname
       .replace(/^\/+/, "")
       .split("/")
       .filter(Boolean)
-      .filter((seg) => !exclude.includes(seg));
-  }, [pathname, exclude]);
+      .filter((seg) => !excludeSet.has(seg));
+  }, [pathname, excludeSet]);
 
   return React.useMemo(() => {
     const items: PathBreadcrumb[] = [];
@@ -56,21 +75,41 @@ export function usePathBreadcrumbs(
 
     if (!parts.length) {
       return baseHref === "/"
-        ? [{ label: "Dashboard" }]
-        : [{ label: "Dashboard", href: baseHref }];
+        ? [{ label: rootLabel }]
+        : [{ label: rootLabel, href: baseHref }];
     }
 
-    items.push({ label: "Dashboard", href: baseHref });
+    items.push({ label: rootLabel, href: baseHref });
 
     parts.forEach((seg, i) => {
       href += `/${seg}`;
       href = href.replace(/\/+/g, "/");
 
-      const raw = decode ? decodeURIComponent(seg) : seg;
-      const label =
-        labelMap[seg] ??
-        transformLabel?.(raw) ??
-        raw.replace(/-/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
+      let raw: string;
+      if (decode) {
+        try {
+          raw = decodeURIComponent(seg);
+        } catch {
+          // If decoding fails (malformed URI), use original segment
+          raw = seg;
+        }
+      } else {
+        raw = seg;
+      }
+      const fallback = raw.replace(/-/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
+      let label: string;
+      if (labelMap[seg] !== undefined) {
+        label = labelMap[seg]!;
+      } else if (transformLabel) {
+        try {
+          label = transformLabel(raw);
+        } catch {
+          // If user callback throws, fall back to safe formatting
+          label = fallback;
+        }
+      } else {
+        label = fallback;
+      }
 
       items.push({
         label,
@@ -79,5 +118,5 @@ export function usePathBreadcrumbs(
     });
 
     return items;
-  }, [parts, baseHref, labelMap, decode, transformLabel]);
+  }, [parts, baseHref, labelMap, decode, transformLabel, rootLabel]);
 }

@@ -13,35 +13,85 @@ import {
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import HomeIcon from "@mui/icons-material/Home";
 
+/**
+ * Individual breadcrumb item configuration.
+ */
 export type BreadcrumbItem = {
+  /** Display label for the breadcrumb */
   label: string;
+  /** Optional href for the breadcrumb link (omit for current page) */
   href?: string;
+  /** Optional icon to display before the label */
   icon?: React.ReactNode;
+  /** Optional title/tooltip text for the breadcrumb */
   title?: string;
+  /** If true, adds `target="_blank"` and `rel="noopener noreferrer"` for external links */
   external?: boolean;
 };
 
+/**
+ * Props for the Breadcrumbs component.
+ */
 export type BreadcrumbsProps = {
+  /** Array of breadcrumb items to display */
   items: BreadcrumbItem[];
+  /** Custom link component (e.g., Next.js `Link` or React Router `Link`) */
   LinkComponent?: React.ElementType;
+  /** Props to pass through to the underlying MUI Breadcrumbs component */
   muiProps?: Omit<MUIBreadcrumbsProps, "children">;
+  /** Custom separator icon/node between breadcrumb items */
   separatorIcon?: React.ReactNode;
+  /** Label that triggers the home icon display (default: "Home") */
   homeLabel?: string;
+  /** ARIA label for the breadcrumb navigation (default: "Breadcrumb") */
   ariaLabel?: string;
+  /** If true, reduces spacing between items for a more compact display */
   dense?: boolean;
 
+  /** Custom styles for the root breadcrumbs container */
   sx?: SxProps<Theme>;
+  /** Custom styles applied to all breadcrumb items */
   itemSx?: SxProps<Theme>;
+  /** Custom styles applied to breadcrumb links */
   linkSx?: SxProps<Theme>;
+  /** Custom styles applied to the current (last) breadcrumb item */
   currentSx?: SxProps<Theme>;
+  /** Custom styles for the content wrapper (icon + label) */
   contentSx?: SxProps<Theme>;
+  /** Custom styles for breadcrumb icons */
   iconSx?: SxProps<Theme>;
+  /** Custom styles for breadcrumb labels */
   labelSx?: SxProps<Theme>;
 };
 
 const sxJoin = (...parts: Array<SxProps<Theme> | undefined>): SxProps<Theme> =>
   parts.filter(Boolean) as SxProps<Theme>;
 
+/**
+ * Breadcrumbs component built on MUI with Next.js and React Router support.
+ *
+ * @param props - Breadcrumbs configuration props
+ * @returns A fully accessible breadcrumb navigation component
+ *
+ * @example
+ * ```tsx
+ * import Link from "next/link";
+ * import { Breadcrumbs } from "@ameshkin/nextcrumbs";
+ *
+ * function MyBreadcrumbs() {
+ *   return (
+ *     <Breadcrumbs
+ *       LinkComponent={Link}
+ *       items={[
+ *         { label: "Home", href: "/" },
+ *         { label: "Products", href: "/products" },
+ *         { label: "New Product" }
+ *       ]}
+ *     />
+ *   );
+ * }
+ * ```
+ */
 export default function Breadcrumbs({
                                       items,
                                       LinkComponent = MUILink,
@@ -58,7 +108,8 @@ export default function Breadcrumbs({
                                       iconSx,
                                       labelSx,
                                     }: BreadcrumbsProps) {
-  const lastIndex = items.length - 1;
+  const safeItems = Array.isArray(items) ? items : [];
+  const lastIndex = safeItems.length - 1;
 
   const defaultRootSx: SxProps<Theme> = {
     mb: 2,
@@ -107,7 +158,8 @@ export default function Breadcrumbs({
     const isHome = item.href === "/" || item.label.toLowerCase() === homeLabel.toLowerCase();
     const icon = item.icon ?? (isHome ? <HomeIcon color="primary" sx={{ fontSize: 18 }} /> : null);
     const label = isHome ? homeLabel : item.label;
-    const key = item.href || item.label;
+    // Use index in key to prevent collisions when multiple items have same href/label
+    const key = `${index}-${item.href || item.label}`;
 
     if (isLink) {
       return (
@@ -142,7 +194,7 @@ export default function Breadcrumbs({
       sx={sxJoin(defaultRootSx, sx)}
       {...muiProps}
     >
-      {items.map(renderCrumb)}
+      {safeItems.map(renderCrumb)}
     </MUIBreadcrumbs>
   );
 }
