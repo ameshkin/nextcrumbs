@@ -149,6 +149,8 @@ export function BreadcrumbJsonLd({
   crumbs: JsonLdBreadcrumb[] | unknown;
   origin?: string;
 }): React.JSX.Element {
+  // BUG-028: useMemo depends on crumbs array reference - callers should memoize crumbs array
+  // to avoid unnecessary recalculations when array reference changes but content is the same
   const json = React.useMemo(() => toJsonLd(crumbs, { origin }), [crumbs, origin]);
   return React.createElement("script", {
     type: "application/ld+json",
@@ -185,9 +187,15 @@ export function BreadcrumbJsonLd({
  */
 export function breadcrumbsToJsonLd(items: BreadcrumbItem[] | unknown): JsonLdBreadcrumb[] {
   if (!Array.isArray(items)) return [];
-  return items.map((item) => ({
-    name: String((item as BreadcrumbItem).label),
-    href: (item as BreadcrumbItem).href,
-  }));
+  return items
+    .filter((item): item is BreadcrumbItem => {
+      // Filter out items with invalid or missing labels
+      // Note: Empty string labels are intentionally allowed (see BUG-027)
+      return item != null && typeof item === "object" && typeof (item as BreadcrumbItem).label === "string";
+    })
+    .map((item) => ({
+      name: item.label, // label is guaranteed to be string after filter (empty strings allowed)
+      href: item.href,
+    }));
 }
 

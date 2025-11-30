@@ -1,9 +1,19 @@
 .idea
 dist
-node_modules
+node_modules/
 .cursor
 .cursorrules
 .nvmrc
 .progress
 .vscode
 .orchestrator
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.production.local
+.env.production
+
+# NPM
+.npmrc

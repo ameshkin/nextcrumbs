@@ -1,0 +1,20 @@
+{
+  "$schema": "./node_modules/@ameshkin/jira-mate/config/jira-mate.schema.json",
+  "version": "1.0.0",
+  "jiraBaseUrl": "https://pamcms.atlassian.net",
+  "defaultIssueType": "Task",
+  "projects": [
+    {
+      "slug": "nextcrumbs",
+      "displayName": "NextCrumbs",
+      "jiraProjectKey": "NXT",
+      "repoPath": "my-npm-packages/nextcrumbs",
+      "progress": {
+        "root": ".progress",
+        "epicsFile": "epics.json",
+        "storiesDir": "stories",
+        "bugsFile": "bugs.json"
+      }
+    }
+  ]
+}

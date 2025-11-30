@@ -155,11 +155,13 @@ export default function Breadcrumbs({
   const renderCrumb = (item: BreadcrumbItem, index: number) => {
     const isLast = index === lastIndex;
     const isLink = !!item.href && !isLast;
-    const isHome = item.href === "/" || item.label.toLowerCase() === homeLabel.toLowerCase();
+    // BUG-026: Add runtime validation for label to prevent TypeError
+    const labelStr = typeof item.label === "string" ? item.label : "";
+    const isHome = item.href === "/" || (labelStr && labelStr.toLowerCase() === homeLabel.toLowerCase());
     const icon = item.icon ?? (isHome ? <HomeIcon color="primary" sx={{ fontSize: 18 }} /> : null);
-    const label = isHome ? homeLabel : item.label;
-    // Use index in key to prevent collisions when multiple items have same href/label
-    const key = `${index}-${item.href || item.label}`;
+    const label = isHome ? homeLabel : labelStr;
+    // BUG-024: Add fallback for key to prevent 'undefined' or 'null' strings
+    const key = `${index}-${item.href || labelStr || "item"}`;
 
     if (isLink) {
       return (

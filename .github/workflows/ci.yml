@@ -28,19 +28,12 @@ jobs:
 
       - name: Configure npm for GitHub Packages
         run: |
-          # Try PAT first (has read:packages scope), then fallback to GITHUB_TOKEN
-          TOKEN="${{ secrets.NPM_TOKEN || secrets.GITHUB_TOKEN }}"
-          if [ -z "$TOKEN" ]; then
-            echo "Error: No authentication token available (need NPM_TOKEN or GITHUB_TOKEN)"
-            exit 1
-          fi
-          echo "@ameshkin:registry=https://npm.pkg.github.com" >> .npmrc
-          echo "//npm.pkg.github.com/:_authToken=${TOKEN}" >> .npmrc
-          echo "@ameshkin/nextcrumbs:registry=https://registry.npmjs.org" >> .npmrc
-          echo "always-auth=true" >> .npmrc
-          echo "✓ Configured .npmrc for GitHub Packages"
+          echo "@ameshkin:registry=https://npm.pkg.github.com" >> ~/.npmrc
+          echo "//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}" >> ~/.npmrc
+          echo "@ameshkin/nextcrumbs:registry=https://registry.npmjs.org" >> ~/.npmrc
+          echo "always-auth=true" >> ~/.npmrc
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN || secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install dependencies
         run: npm ci --legacy-peer-deps

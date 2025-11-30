@@ -107,8 +107,8 @@ describe("breadcrumbsToJsonLd edge cases", () => {
       { label: "Products" },
     ];
     const result = breadcrumbsToJsonLd(items);
-    expect(result[0].item).toBeUndefined();
-    expect(result[1].item).toBeUndefined();
+    expect(result[0].href).toBeUndefined();
+    expect(result[1].href).toBeUndefined();
   });
 
   it("handles items with very long labels", () => {
