@@ -8,30 +8,30 @@
     "packages/*"
   ],
   "author": "Amir Meshkin <amir.meshkin@gmail.com> (https://github.com/ameshkin)",
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./public/index.js",
+  "module": "./public/index.js",
+  "types": "./public/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "default": "./dist/index.js"
+      "types": "./public/index.d.ts",
+      "import": "./public/index.js",
+      "default": "./public/index.js"
     },
     "./breadcrumbs": {
-      "types": "./dist/Breadcrumbs.d.ts",
-      "import": "./dist/Breadcrumbs.js"
+      "types": "./public/Breadcrumbs.d.ts",
+      "import": "./public/Breadcrumbs.js"
     },
     "./hooks/usePathBreadcrumbs": {
-      "types": "./dist/hooks/usePathBreadcrumbs.d.ts",
-      "import": "./dist/hooks/usePathBreadcrumbs.js"
+      "types": "./public/hooks/usePathBreadcrumbs.d.ts",
+      "import": "./public/hooks/usePathBreadcrumbs.js"
     },
     "./hooks/useReactRouterBreadcrumbs": {
-      "types": "./dist/hooks/useReactRouterBreadcrumbs.d.ts",
-      "import": "./dist/hooks/useReactRouterBreadcrumbs.js"
+      "types": "./public/hooks/useReactRouterBreadcrumbs.d.ts",
+      "import": "./public/hooks/useReactRouterBreadcrumbs.js"
     },
     "./utils/jsonld": {
-      "types": "./dist/utils/jsonld.d.ts",
-      "import": "./dist/utils/jsonld.js"
+      "types": "./public/utils/jsonld.d.ts",
+      "import": "./public/utils/jsonld.js"
     }
   },
   "files": [
@@ -48,9 +48,12 @@
     "test:e2e:ui": "playwright test",
     "test:e2e:bdd": "cucumber-js \"tests/e2e/features/**/*.feature\" --require \"tests/e2e/steps/**/*.mjs\"",
     "typecheck": "tsc -p tsconfig.build.json --noEmit",
-    "release:pre": "npm run typecheck && npm run test -- --run && npm run build",
-    "release:patch": "npm run release:pre && npm version patch -m \"chore(release): %s\" && git push && git push --tags && npm publish --access public",
-    "publish:patch": "npm run release:patch"
+    "prepublishOnly": "npm run typecheck && npm run test:run && npm run build",
+    "publish:all": "npm run typecheck && npm run test:run && npm run build && npm version patch -m \"chore(release): %s\" && git push --follow-tags && npm publish && npm publish --access public --registry https://registry.npmjs.org/",
+    "orchestrator:ci": "ts-node ./scripts/orchestrator-ci.ts",
+    "clean-build": "bash ./scripts/orchestrator-clean-build.sh",
+    "orchestrator:clean-build": "bash ./scripts/orchestrator-clean-build.sh",
+    "jira:projects": "node scripts/jira-projects.js"
   },
   "peerDependencies": {
     "@emotion/react": ">=11",
@@ -73,6 +76,7 @@
     }
   },
   "devDependencies": {
+    "@ameshkin/jira-mate": "^0.1.17",
     "@cucumber/cucumber": "^11.2.0",
     "@playwright/test": "^1.57.0",
     "@testing-library/jest-dom": "^6.9.1",

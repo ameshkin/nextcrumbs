@@ -1,6 +1,6 @@
 import assert from "node:assert";
 import { Given, When, Then } from "@cucumber/cucumber";
-import { toJsonLd } from "../../../dist/utils/jsonld.js";
+import { toJsonLd } from "../../../public/utils/jsonld.js";
 
 /** @type {{ name: string, href?: string }[]} */
 let crumbs = [];
