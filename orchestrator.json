@@ -1,0 +1,104 @@
+{
+  "version": "1.0.0",
+  "package": {
+    "name": "nextcrumbs",
+    "scope": "@ameshkin",
+    "fullName": "@ameshkin/nextcrumbs",
+    "type": "library",
+    "description": "Next.js breadcrumb navigation component",
+    "repository": "https://github.com/ameshkin/nextcrumbs",
+    "homepage": "https://github.com/ameshkin/nextcrumbs#readme"
+  },
+  "status": {
+    "state": "production",
+    "productionReady": true,
+    "lastUpdated": "2025-12-02T19:00:00.000Z",
+    "lastPublished": null,
+    "version": "1.0.0",
+    "buildStatus": "passing",
+    "testStatus": "passing"
+  },
+  "instructions": [],
+  "bugs": [],
+  "dependencies": {
+    "production": {},
+    "development": {},
+    "peer": {
+      "react": "^18.0.0",
+      "next": "^15.0.0"
+    },
+    "vulnerabilities": []
+  },
+  "quality": {
+    "typescript": {
+      "enabled": true,
+      "strict": true,
+      "errors": 0,
+      "warnings": 0,
+      "lastCheck": "2025-12-02T19:00:00.000Z"
+    },
+    "linting": {
+      "enabled": true,
+      "tool": "eslint",
+      "errors": 0,
+      "warnings": 0,
+      "lastCheck": "2025-12-02T19:00:00.000Z"
+    },
+    "testing": {
+      "framework": "vitest",
+      "coverage": {
+        "lines": 0,
+        "functions": 0,
+        "branches": 0,
+        "statements": 0
+      },
+      "totalTests": 0,
+      "passing": 0,
+      "failing": 0,
+      "skipped": 0,
+      "lastRun": null
+    },
+    "formatting": {
+      "tool": "prettier",
+      "configured": true
+    }
+  },
+  "publishing": {
+    "registry": "github",
+    "access": "restricted",
+    "authMethod": "token",
+    "prePublishChecks": ["typecheck", "lint", "test", "build"],
+    "autoPublish": false,
+    "publishBranch": "main"
+  },
+  "ci": {
+    "enabled": true,
+    "provider": "github-actions",
+    "workflows": []
+  },
+  "documentation": {
+    "readme": {
+      "exists": true,
+      "complete": true,
+      "lastUpdated": "2025-12-02T19:00:00.000Z"
+    },
+    "api": {
+      "tool": "typedoc",
+      "generated": false,
+      "published": false
+    },
+    "changelog": {
+      "exists": false,
+      "upToDate": false
+    }
+  },
+  "metadata": {
+    "createdAt": "2025-12-02T19:00:00.000Z",
+    "createdBy": "cursor-ai",
+    "schemaVersion": "1.0.0",
+    "lastSchemaUpdate": "2025-12-02T19:00:00.000Z",
+    "notes": "Next.js breadcrumb navigation component",
+    "tags": ["nextjs", "breadcrumbs", "navigation", "ui"]
+  }
+}
+
