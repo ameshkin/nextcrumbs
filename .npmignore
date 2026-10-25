@@ -1,0 +1,8 @@
+# package.json "files" already limits the tarball to dist/, README, LICENSE.
+# Keep this so npm does not fall back to walking .gitignore from a wrong cwd.
+*
+!dist/
+!dist/**
+!README.md
+!LICENSE
+!package.json
