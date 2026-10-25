@@ -4,6 +4,7 @@
 #   Repository: nextcrumbs
 #   Workflow filename: publish.yml
 #   Environment name: (leave empty; this job does not set `environment:`)
+#   Allowed actions: include direct npm publish (not stage-only)
 # Requires npm CLI >= 11.5.1 and Node >= 22.14 on the runner.
 name: Publish
 
@@ -36,12 +37,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node 22
+      # Do NOT pass registry-url. setup-node writes an empty _authToken line that
+      # makes npm skip OIDC and fail with ENEEDAUTH / E404.
+      # See: https://github.com/actions/setup-node/issues/1551
+      - name: Setup Node 24
         uses: actions/setup-node@v4
         with:
-          node-version: "22.14"
-          registry-url: https://registry.npmjs.org
-          # Never cache package manager for release builds
+          node-version: "24"
           cache: npm
 
       - name: Ensure npm supports OIDC trusted publishing
@@ -64,7 +66,14 @@ jobs:
           head -n 1 dist/utils/buildPathBreadcrumbs.js | grep -vq 'use client'
           head -n 1 dist/Breadcrumbs.js | grep -q 'use client'
 
+      - name: Strip any leftover _authToken (OIDC must not see classic auth)
+        run: |
+          set -euo pipefail
+          for npmrc in "${NPM_CONFIG_USERCONFIG:-}" "$HOME/.npmrc" .npmrc; do
+            if [ -n "${npmrc}" ] && [ -f "${npmrc}" ]; then
+              sed -i '/_authToken/d' "${npmrc}" || true
+            fi
+          done
+
       - name: Publish
-        # Trusted publishing authenticates via OIDC. Do not set NODE_AUTH_TOKEN
-        # (empty or otherwise). An empty token makes npm skip OIDC and fail ENEEDAUTH.
         run: npm publish --access public
