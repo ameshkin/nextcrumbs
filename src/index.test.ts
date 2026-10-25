@@ -8,6 +8,7 @@ import {
   NextCrumb,
   Breadcrumbs,
   usePathBreadcrumbs,
+  buildPathBreadcrumbs,
   toJsonLd,
   BreadcrumbJsonLd,
   breadcrumbsToJsonLd,
@@ -37,6 +38,16 @@ describe("index exports", () => {
   it("exports usePathBreadcrumbs hook", () => {
     expect(usePathBreadcrumbs).toBeDefined();
     expect(typeof usePathBreadcrumbs).toBe("function");
+  });
+
+  it("exports buildPathBreadcrumbs pure helper", () => {
+    expect(buildPathBreadcrumbs).toBeDefined();
+    expect(typeof buildPathBreadcrumbs).toBe("function");
+    expect(buildPathBreadcrumbs("/a/b", { rootLabel: "Home" })).toEqual([
+      { label: "Home", href: "/" },
+      { label: "A", href: "/a" },
+      { label: "B" },
+    ]);
   });
 
   it("does not export React Router hooks from the main entry", async () => {

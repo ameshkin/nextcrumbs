@@ -38,11 +38,19 @@ describe("toJsonLd", () => {
     });
   });
 
-  it("uses default origin when not provided", () => {
+  it("omits item for relative hrefs when origin is not provided", () => {
     const crumbs = [{ name: "Home", href: "/" }];
     const result = toJsonLd(crumbs);
 
-    expect(result.itemListElement[0].item).toBe("https://example.com/");
+    expect(result.itemListElement[0].name).toBe("Home");
+    expect(result.itemListElement[0].item).toBeUndefined();
+  });
+
+  it("keeps absolute http(s) hrefs without origin", () => {
+    const crumbs = [{ name: "Docs", href: "https://docs.example.com/guide" }];
+    const result = toJsonLd(crumbs);
+
+    expect(result.itemListElement[0].item).toBe("https://docs.example.com/guide");
   });
 
   it("handles empty array", () => {
@@ -120,16 +128,16 @@ describe("BreadcrumbJsonLd", () => {
     expect(parsed.itemListElement).toHaveLength(2);
   });
 
-  it("uses default origin when not provided", () => {
+  it("falls back to window.location.origin in the browser when origin is omitted", () => {
     const crumbs = [{ name: "Home", href: "/" }];
     const { container } = render(<BreadcrumbJsonLd crumbs={crumbs} />);
 
     const script = container.querySelector('script[type="application/ld+json"]');
     const parsed = JSON.parse(script!.textContent!);
-    expect(parsed.itemListElement[0].item).toBe("https://example.com/");
+    expect(parsed.itemListElement[0].item).toBe(`${window.location.origin}/`);
   });
 
-  it("memoizes JSON-LD output", () => {
+  it("keeps JSON-LD stable across rerenders with the same props", () => {
     const crumbs = [{ name: "Home", href: "/" }];
     const { container, rerender } = render(
       <BreadcrumbJsonLd crumbs={crumbs} origin="https://example.com" />

@@ -168,14 +168,13 @@ describe("BreadcrumbJsonLd edge cases", () => {
     expect(secondParsed.itemListElement[0].item).toBe("https://other.com/");
   });
 
-  it("handles missing origin prop", () => {
+  it("handles missing origin prop via window.location.origin in jsdom", () => {
     const crumbs = [{ name: "Home", href: "/" }];
     const { container } = render(<BreadcrumbJsonLd crumbs={crumbs} />);
     const script = container.querySelector('script');
     expect(script).toBeTruthy();
     const parsed = JSON.parse(script!.textContent!);
-    // When origin is missing, it defaults to "https://example.com"
-    expect(parsed.itemListElement[0].item).toBe("https://example.com/");
+    expect(parsed.itemListElement[0].item).toBe(`${window.location.origin}/`);
   });
 
   it("handles empty crumbs array", () => {

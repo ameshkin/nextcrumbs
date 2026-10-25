@@ -105,10 +105,22 @@ jobs:
             "dist/hooks/usePathBreadcrumbs.js",
             "dist/hooks/useReactRouterBreadcrumbs.js",
             "dist/utils/jsonld.js",
+            "dist/utils/buildPathBreadcrumbs.js",
           ]) {
             if (!fs.existsSync(path.join(process.cwd(), rel))) {
               errors.push(`missing build artifact: ${rel}`);
             }
+          }
+
+          const mustBeClient = ["dist/Breadcrumbs.js", "dist/hooks/usePathBreadcrumbs.js"];
+          const mustNotBeClient = ["dist/utils/jsonld.js", "dist/utils/buildPathBreadcrumbs.js"];
+          for (const rel of mustBeClient) {
+            const head = fs.readFileSync(rel, "utf8").slice(0, 20);
+            if (!head.includes("use client")) errors.push(`${rel} must start with "use client"`);
+          }
+          for (const rel of mustNotBeClient) {
+            const head = fs.readFileSync(rel, "utf8").slice(0, 20);
+            if (head.includes("use client")) errors.push(`${rel} must NOT have "use client"`);
           }
 
           if (errors.length) {

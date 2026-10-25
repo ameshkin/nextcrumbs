@@ -44,11 +44,13 @@
 
 * **MUI ^7** breadcrumbs under the hood (accessible, stable)
 * **Next.js** ready via pluggable `LinkComponent` (for example `next/link`)
-* Optional **URL → items** helper for App Router (`usePathBreadcrumbs`)
-* **React Router** helper on a **subpath only** (`useReactRouterBreadcrumbs`). Optional peer
-* **JSON-LD** helpers for schema.org `BreadcrumbList`
-* Tree-shakable **subpath exports** (`/breadcrumbs`, `/hooks/*`, `/utils/jsonld`)
+* Optional **URL → items** helpers: `usePathBreadcrumbs` (client) and RSC-safe `buildPathBreadcrumbs`
+* **React Router** helper on a **subpath only** (`useReactRouterBreadcrumbs`). Use `linkProp="to"`
+* **JSON-LD** helpers for schema.org `BreadcrumbList` (no `example.com` default)
+* First-class `maxItems` / collapse, `size`, `truncate`, and optional `jsonLdOrigin`
+* Tree-shakable **subpath exports** (`/breadcrumbs`, `/hooks/*`, `/utils/*`)
 * Fully typed with TypeScript
+* **Trusted Publishing** workflow (`.github/workflows/publish.yml`) for OTP-free CI releases
 
 ---
 
@@ -168,9 +170,10 @@ export default function Demo() {
 | --- | --- |
 | `@ameshkin/nextcrumbs` | `Breadcrumbs`, `NextCrumb`, `usePathBreadcrumbs`, JSON-LD helpers + types |
 | `@ameshkin/nextcrumbs/breadcrumbs` | Component only |
-| `@ameshkin/nextcrumbs/hooks/usePathBreadcrumbs` | Path helper |
+| `@ameshkin/nextcrumbs/hooks/usePathBreadcrumbs` | Path helper (client hook) |
 | `@ameshkin/nextcrumbs/hooks/useReactRouterBreadcrumbs` | React Router helper (`useReactRouterBreadcrumbs`, `useRRBreadcrumbs`) |
-| `@ameshkin/nextcrumbs/utils/jsonld` | `toJsonLd`, `BreadcrumbJsonLd`, `breadcrumbsToJsonLd` |
+| `@ameshkin/nextcrumbs/utils/buildPathBreadcrumbs` | RSC-safe pure path → crumbs helper |
+| `@ameshkin/nextcrumbs/utils/jsonld` | `toJsonLd`, `BreadcrumbJsonLd`, `breadcrumbsToJsonLd` (no `"use client"`) |
 | `@ameshkin/nextcrumbs/package.json` | Package metadata |
 
 Published files live under **`dist/`** (`main` / `types` / `exports` all point there).
@@ -185,15 +188,19 @@ Published files live under **`dist/`** (`main` / `types` / `exports` all point t
 | --------------- | ------------------------------------------------------------------------------------------------ | -------------------- | --------------------------------------------------------- |
 | `items`         | `{ label: string; href?: string; icon?: React.ReactNode; title?: string; external?: boolean }[]` | **required**         | The breadcrumb trail; last item usually has no `href`.    |
 | `LinkComponent` | `React.ElementType`                                                                              | `@mui/material/Link` | Custom link component (for example Next.js `Link`).       |
-| `muiProps`      | `Omit<MUIBreadcrumbsProps,"children">`                                                           | -                    | Props passed through to MUI `<Breadcrumbs />` (for example `maxItems`). |
+| `linkProp`      | `"href" \| "to"`                                                                                 | `"href"`             | Routing prop for `LinkComponent`. Use `"to"` with React Router. |
+| `maxItems` / `itemsBeforeCollapse` / `itemsAfterCollapse` / `expandText` | number / string | - | First-class MUI collapse controls for deep trails. |
+| `size`          | `"small" \| "medium" \| "large"`                                                                 | `"medium"`           | Crumb text size.                                          |
+| `truncate`      | `boolean \| number`                                                                              | `false`              | Ellipsis long labels (`true` = 160px, or pass max width px). |
+| `jsonLdOrigin`  | `string`                                                                                         | -                    | When set, also emits BreadcrumbList JSON-LD for these items. |
+| `muiProps`      | `Omit<MUIBreadcrumbsProps,"children" \| collapse props>`                                         | -                    | Extra props for MUI `<Breadcrumbs />`.                    |
 | `separatorIcon` | `React.ReactNode`                                                                                | `ChevronRightIcon`   | Icon/node placed between items.                           |
-| `homeLabel`     | `string`                                                                                         | `"Home"`             | If a crumb's label matches, it can receive a Home icon.   |
+| `homeLabel`     | `string`                                                                                         | `"Home"`             | Display label for the home crumb (`homeHref`).            |
+| `homeHref`      | `string`                                                                                         | `"/"`                | Href that receives the automatic Home icon (not label match). |
 | `ariaLabel`     | `string`                                                                                         | `"Breadcrumb"`       | `aria-label` on the nav.                                  |
 | `dense`         | `boolean`                                                                                        | `false`              | Tighter gap between items.                                |
-| `sx`            | `SxProps<Theme>`                                                                                 | -                    | Root styles.                                              |
+| `sx`            | `SxProps<Theme>`                                                                                 | -                    | Root styles (default margin is `0`).                      |
 | `itemSx` / `linkSx` / `currentSx` / `contentSx` / `iconSx` / `labelSx` | `SxProps<Theme>` | - | Style slots for crumbs. |
-
-Use `muiProps={{ maxItems: 4 }}` (and related collapse props) for deep trails until a first-class `maxItems` API lands.
 
 ### `usePathBreadcrumbs(pathname, options?)`
 
@@ -342,10 +349,11 @@ This package peers **`@mui/material@^7`**. Do not run `npm audit fix --force` to
 
 ### Does it work with React Router?
 
-Yes. Import the hook from the React Router subpath, or pass your router's `Link` through `LinkComponent`.
+Yes. Import the hook from the React Router subpath, and pass `LinkComponent={RouterLink}` with **`linkProp="to"`**.
 
 ```ts
 import { useReactRouterBreadcrumbs } from "@ameshkin/nextcrumbs/hooks/useReactRouterBreadcrumbs";
+// <Breadcrumbs LinkComponent={RouterLink} linkProp="to" items={items} />
 ```
 
 `react-router-dom` is optional. Install it only when you use that subpath.
@@ -364,7 +372,7 @@ Omit `href` on the last item so it renders as text. Then use `currentSx` or your
 
 ### Can I disable icons?
 
-Yes. Do not pass `icon` on items. Set `homeLabel` to something that will not match if you also want to skip the automatic home icon.
+Yes. Do not pass `icon` on items. The automatic Home icon only applies when a crumb's `href` equals `homeHref` (default `"/"`). Override `homeHref` or pass a custom `icon` / omit the root href if you want no icon.
 
 ### Why is MUI capped at `^7`?
 

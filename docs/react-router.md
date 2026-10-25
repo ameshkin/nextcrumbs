@@ -42,7 +42,7 @@ export default function Demo() {
 
 ## With SPA navigation (Router `<Link>`)
 
-Pass React Router's `<Link>` as `LinkComponent` so breadcrumb links use client-side navigation:
+Pass React Router's `<Link>` as `LinkComponent` and set **`linkProp="to"`** (React Router expects `to`, not `href`):
 
 ```tsx
 import { Link as RouterLink, BrowserRouter, Routes, Route } from "react-router-dom";
@@ -51,7 +51,7 @@ import { useReactRouterBreadcrumbs } from "@ameshkin/nextcrumbs/hooks/useReactRo
 
 function Trail() {
   const items = useReactRouterBreadcrumbs({ rootLabel: "Home" });
-  return <Breadcrumbs LinkComponent={RouterLink} items={items} />;
+  return <Breadcrumbs LinkComponent={RouterLink} linkProp="to" items={items} />;
 }
 
 export default function App() {
@@ -106,7 +106,7 @@ export default function Trail() {
     mapSegmentLabel: (seg) =>
       seg.replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
   });
-  return <Breadcrumbs LinkComponent={RouterLink} items={items} />;
+  return <Breadcrumbs LinkComponent={RouterLink} linkProp="to" items={items} />;
 }
 ```
 
@@ -156,5 +156,5 @@ it("renders trail", () => {
 ## Notes
 
 * Install `react-router-dom` only if you use this subpath.
-* For SPA navigation, pass `LinkComponent={RouterLink}` to `<Breadcrumbs>`. Without it, links use the default MUI link behavior.
+* For SPA navigation, pass `LinkComponent={RouterLink}` and `linkProp="to"`. Without `linkProp="to"`, crumbs still emit `href`, which breaks direct Router `Link` usage.
 * Do not import this hook from the main `@ameshkin/nextcrumbs` barrel (removed in 0.2.1).

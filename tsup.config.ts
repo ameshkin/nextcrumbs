@@ -6,18 +6,18 @@ import { defineConfig } from "tsup";
  * Library build for @ameshkin/nextcrumbs.
  * Output must match package.json exports (./dist/*). Do not emit to public/.
  */
-const ENTRY_JS = [
+/** Entries that need a Next.js client boundary. Pure helpers stay server-safe. */
+const CLIENT_ENTRY_JS = [
   "index.js",
   "Breadcrumbs.js",
   "hooks/usePathBreadcrumbs.js",
   "hooks/useReactRouterBreadcrumbs.js",
-  "utils/jsonld.js",
 ] as const;
 
 function prependUseClient(outDir: string) {
-  // esbuild drops source "use client" directives. Restore on published entry files
-  // so Next.js App Router treats UI / hooks as client modules.
-  for (const rel of ENTRY_JS) {
+  // esbuild drops source "use client" directives. Restore on UI / hook entries only.
+  // Skip utils/jsonld.js and utils/buildPathBreadcrumbs.js (RSC-safe).
+  for (const rel of CLIENT_ENTRY_JS) {
     const file = join(outDir, rel);
     const src = readFileSync(file, "utf8");
     if (src.startsWith('"use client"') || src.startsWith("'use client'")) continue;
@@ -32,6 +32,7 @@ export default defineConfig({
     "src/hooks/usePathBreadcrumbs.ts",
     "src/hooks/useReactRouterBreadcrumbs.ts",
     "src/utils/jsonld.ts",
+    "src/utils/buildPathBreadcrumbs.ts",
   ],
   format: ["esm"],
   dts: true,

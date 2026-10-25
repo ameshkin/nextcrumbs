@@ -1,5 +1,18 @@
 ## Docs & API Changes
 
+### Bug hunt fixes + features (still 0.2.1, unpublished)
+
+- **BH-01 / `linkProp`:** `linkProp="href" | "to"` so React Router `Link` works without an adapter.
+- **BH-02:** Default root margin is `mb: 0` (set margin via `sx`).
+- **BH-03:** Home icon is `href === homeHref` only (not label match). New `homeHref` prop.
+- **BH-04:** React Router at `/` returns `{ label }` with no self-link `href`.
+- **BH-05:** JSON-LD no longer defaults to `https://example.com`. Relative URLs need `origin`; `BreadcrumbJsonLd` falls back to `window.location.origin` in the browser.
+- **BH-06:** Crumb content renderer hoisted outside render.
+- **BH-07:** `"use client"` is not stamped on `utils/jsonld` or `utils/buildPathBreadcrumbs`.
+- **New:** `maxItems` / collapse props, `size`, `truncate`, `jsonLdOrigin` on `<Breadcrumbs>`.
+- **New:** RSC-safe `buildPathBreadcrumbs` (+ subpath export).
+- **New:** `.github/workflows/publish.yml` for npm Trusted Publishing (OIDC).
+
 ### Documentation refresh (0.2.1)
 
 - Root README rewritten for 0.2.1: version warning, Emotion peers, subpath table, full prop list (`dense`, `ariaLabel`, sx slots), troubleshooting for broken 0.2.0 and MUI peer conflicts.

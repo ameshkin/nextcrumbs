@@ -5,34 +5,12 @@
  * keeping the last segment as the current (non-link) item and building
  * cumulative hrefs for prior segments.
  *
- * @param options - Configuration options for breadcrumb generation
- * @param options.rootLabel - Optional first crumb label that links to "/"
- * @param options.basePath - Strip a leading base path from the URL when building crumbs
- * @param options.decode - Whether to decode URI segments using decodeURIComponent (default: true)
- * @param options.exclude - Array of strings or regexes to skip specific segments
- * @param options.mapSegmentLabel - Custom function to map a segment to a label or return null to hide it
- * @returns Array of breadcrumb items compatible with the `<Breadcrumbs />` component
- *
- * @example
- * ```tsx
- * import { BrowserRouter } from "react-router-dom";
- * import { Breadcrumbs } from "@ameshkin/nextcrumbs";
- * import { useReactRouterBreadcrumbs } from "@ameshkin/nextcrumbs/hooks/useReactRouterBreadcrumbs";
- *
- * function Trail() {
- *   const items = useReactRouterBreadcrumbs({
- *     rootLabel: "Home",
- *     exclude: [/^_/],
- *     mapSegmentLabel: (seg) => seg.replace(/-/g, " ").toUpperCase()
- *   });
- *   return <Breadcrumbs items={items} />;
- * }
- * ```
- *
  * @remarks
  * Requires `react-router-dom` as an optional peer dependency.
  * Import only from this subpath so the main `@ameshkin/nextcrumbs` entry
  * stays free of React Router for Next.js apps.
+ *
+ * Pair with `<Breadcrumbs linkProp="to" LinkComponent={RouterLink} />`.
  */
 import * as React from "react"
 import type { ReactNode } from "react"
@@ -58,7 +36,7 @@ export type BreadcrumbItem = {
  * Configuration options for useReactRouterBreadcrumbs hook.
  */
 export type ReactRouterBreadcrumbsOptions = {
-  /** Optional first crumb label that links to "/" */
+  /** Optional first crumb label that links to "/" when there are deeper segments */
   rootLabel?: string
   /** Strip a leading base path from the URL when building crumbs */
   basePath?: string
@@ -87,7 +65,6 @@ export function useReactRouterBreadcrumbs(options?: ReactRouterBreadcrumbsOption
         try {
           return x.test(seg)
         } catch {
-          // Treat invalid/mutated regex as non-matching
           return false
         }
       })
@@ -98,7 +75,6 @@ export function useReactRouterBreadcrumbs(options?: ReactRouterBreadcrumbsOption
         try {
           s = decodeURIComponent(seg)
         } catch {
-          // If decoding fails (malformed URI), use original segment
           s = seg
         }
       } else {
@@ -110,6 +86,12 @@ export function useReactRouterBreadcrumbs(options?: ReactRouterBreadcrumbsOption
     const segments = raw.filter((s) => !isExcluded(s))
     const items: BreadcrumbItem[] = []
 
+    // At root with no segments: current page only (no self-link).
+    if (segments.length === 0) {
+      items.push({ label: rootLabel || "Home" })
+      return items
+    }
+
     if (rootLabel) items.push({ label: rootLabel, href: "/" })
 
     let acc = basePath && basePath !== "/" ? basePath.replace(/\/+$/, "") : ""
@@ -120,7 +102,6 @@ export function useReactRouterBreadcrumbs(options?: ReactRouterBreadcrumbsOption
         try {
           label = mapSegmentLabel(seg, i, segments)
         } catch {
-          // If user callback throws, fall back to default formatter
           label = format(seg)
         }
       } else {
@@ -131,7 +112,6 @@ export function useReactRouterBreadcrumbs(options?: ReactRouterBreadcrumbsOption
       items.push(isLast ? { label } : { label, href: acc || "/" })
     })
 
-    if (!rootLabel && items.length === 0) items.push({ label: "Home", href: "/" })
     return items
   }, [pathname, rootLabel, basePath, decode, exclude, mapSegmentLabel])
 }

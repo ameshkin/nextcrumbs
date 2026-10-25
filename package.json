@@ -30,6 +30,10 @@
     "./utils/jsonld": {
       "types": "./dist/utils/jsonld.d.ts",
       "import": "./dist/utils/jsonld.js"
+    },
+    "./utils/buildPathBreadcrumbs": {
+      "types": "./dist/utils/buildPathBreadcrumbs.d.ts",
+      "import": "./dist/utils/buildPathBreadcrumbs.js"
     }
   },
   "files": [
