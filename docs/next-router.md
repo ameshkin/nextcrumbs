@@ -1,8 +1,10 @@
 # NextCrumbs • Next.js App Router
 
-Use `usePathBreadcrumbs` to derive breadcrumb items from `next/navigation` and render with your `next/link`.
+Optional guide for Next.js. NextCrumbs itself does **not** require Next.js (Vite and other React apps work fine; see [vanilla-json.md](./vanilla-json.md)).
 
-## Quick start (auto from URL)
+Derive breadcrumb items from `next/navigation` and render with `next/link`. You do **not** need `react-router-dom` for this path.
+
+## Quick start (client)
 
 ```tsx
 "use client";
@@ -18,6 +20,23 @@ export default function AutoTrail() {
 }
 ```
 
+## Server Components (RSC-safe)
+
+Prefer the pure helper so you do not pull a client boundary:
+
+```tsx
+import Link from "next/link";
+import { Breadcrumbs } from "@ameshkin/nextcrumbs";
+import { buildPathBreadcrumbs } from "@ameshkin/nextcrumbs/utils/buildPathBreadcrumbs";
+
+export default function ServerTrail({ pathname }: { pathname: string }) {
+  const items = buildPathBreadcrumbs(pathname, { rootLabel: "Home" });
+  return <Breadcrumbs LinkComponent={Link} items={items} />;
+}
+```
+
+`usePathBreadcrumbs` is a thin client wrapper around the same helper.
+
 ## Customize labels, base, and excludes
 
 ```tsx
@@ -30,9 +49,11 @@ export default function CustomTrail() {
   const pathname = usePathname();
   const items = usePathBreadcrumbs(pathname, {
     baseHref: "/",
+    rootLabel: "Home",
     labelMap: { sku: "SKU", new: "Create" },
     exclude: ["_private"],
-    decode: true
+    decode: true,
+    transformLabel: (seg) => seg.replace(/-/g, " "),
   });
 
   return <Breadcrumbs LinkComponent={Link} items={items} />;
@@ -60,7 +81,7 @@ export default function StaticTrail() {
 }
 ```
 
-## Custom separator and icons
+## Separator, icons, and SEO
 
 ```tsx
 "use client";
@@ -74,6 +95,8 @@ export default function StyledTrail() {
     <Breadcrumbs
       LinkComponent={Link}
       separatorIcon={<NavigateNextIcon fontSize="small" />}
+      jsonLdOrigin="https://yoursite.com"
+      dense
       items={[
         { label: "Home", href: "/", icon: <HomeOutlinedIcon /> },
         { label: "Products", href: "/products" },
@@ -84,32 +107,31 @@ export default function StyledTrail() {
 }
 ```
 
-## `usePathBreadcrumbs(pathname, options?)`
+The automatic Home icon is applied only when `href === homeHref` (default `"/"`).
+
+## `usePathBreadcrumbs` / `buildPathBreadcrumbs` options
+
+| Option           | Type                          | Default       | Description                    |
+| ---------------- | ----------------------------- | ------------- | ------------------------------ |
+| `baseHref`       | `string`                      | `"/"`         | Root href for the first crumb  |
+| `labelMap`       | `Record<string,string>`       | `{}`          | Override labels by URL segment |
+| `exclude`        | `string[]`                    | `[]`          | Skip specific segments         |
+| `decode`         | `boolean`                     | `true`        | `decodeURIComponent` on labels |
+| `rootLabel`      | `string`                      | `"Dashboard"` | Root crumb label               |
+| `transformLabel` | `(segment: string) => string` | -             | Custom formatter               |
 
 ```ts
-type PathOptions = {
-  baseHref?: string
-  labelMap?: Record<string, string>
-  exclude?: string[]
-  decode?: boolean
-}
+import { usePathBreadcrumbs } from "@ameshkin/nextcrumbs/hooks/usePathBreadcrumbs";
+import { buildPathBreadcrumbs } from "@ameshkin/nextcrumbs/utils/buildPathBreadcrumbs";
 ```
 
-| Option     | Type                    | Default | Description                          |
-| ---------- | ----------------------- | ------- | ------------------------------------ |
-| `baseHref` | `string`                | `"/"`   | Root href for the first crumb        |
-| `labelMap` | `Record<string,string>` | `{}`    | Override labels by URL segment       |
-| `exclude`  | `string[]`              | `[]`    | Skip specific segments               |
-| `decode`   | `boolean`               | `true`  | Apply `decodeURIComponent` to labels |
+## Accessibility and SEO
 
-## Accessibility & SEO
+* Default `aria-label` is `"Breadcrumb"` (override with `ariaLabel`).
+* Current page receives `aria-current="page"`.
+* For JSON-LD, pass `jsonLdOrigin` or use `BreadcrumbJsonLd` / `breadcrumbsToJsonLd` (see [vanilla-json.md](./vanilla-json.md)).
 
-* `<Breadcrumbs aria-label="breadcrumbs">` for screen readers
-* For JSON-LD, add page-level `<script type="application/ld+json">` in your layout if you prefer static SEO markup (see [`docs/vanilla-json.md`](./vanilla-json.md))
-
-## Theming
-
-Use your app’s `ThemeProvider`. Pass MUI props via `muiProps` when needed:
+## Collapse and density
 
 ```tsx
 "use client";
@@ -120,7 +142,11 @@ export default function DenseTrail() {
   return (
     <Breadcrumbs
       LinkComponent={Link}
-      muiProps={{ maxItems: 4, itemsBeforeCollapse: 1, itemsAfterCollapse: 1 }}
+      maxItems={4}
+      itemsBeforeCollapse={1}
+      itemsAfterCollapse={1}
+      size="small"
+      truncate={160}
       items={[
         { label: "Home", href: "/" },
         { label: "Catalog", href: "/catalog" },
@@ -133,22 +159,30 @@ export default function DenseTrail() {
 }
 ```
 
+Style slots: `sx`, `itemSx`, `linkSx`, `currentSx`, `contentSx`, `iconSx`, `labelSx`. Default root margin is `0`.
+
 ## Testing tip (Vitest + jsdom)
 
-Mock `next/link` to a simple anchor when rendering in jsdom:
+Mock `next/link` to a simple anchor:
 
 ```tsx
-// test/NextLinkMock.tsx
 import * as React from "react";
 
-export default function NextLinkMock(props: any) {
+export default function NextLinkMock(props: {
+  href: string | { pathname?: string };
+  children?: React.ReactNode;
+}) {
   const { href, children, ...rest } = props;
-  return <a href={typeof href === "string" ? href : href?.pathname} {...rest}>{children}</a>;
+  const resolved = typeof href === "string" ? href : href?.pathname;
+  return (
+    <a href={resolved} {...rest}>
+      {children}
+    </a>
+  );
 }
 ```
 
 ```tsx
-// Breadcrumbs.test.tsx
 import { render, screen } from "@testing-library/react";
 import Link from "../test/NextLinkMock";
 import { Breadcrumbs } from "@ameshkin/nextcrumbs";

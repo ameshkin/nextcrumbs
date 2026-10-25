@@ -1,29 +1,17 @@
 "use client";
 
 import * as React from "react";
+import {
+  buildPathBreadcrumbs,
+  type PathBreadcrumb,
+  type PathCrumbOptions,
+} from "../utils/buildPathBreadcrumbs";
 
-export type PathBreadcrumb = {
-  label: string;
-  href?: string;
-};
-
-export type PathCrumbOptions = {
-  /** Starting path prefix for the first crumb (default: "/") */
-  baseHref?: string;
-  /** Custom label overrides per URL segment */
-  labelMap?: Record<string, string>;
-  /** Segment values to omit from the breadcrumb trail */
-  exclude?: string[];
-  /** Whether to decode URI segments using decodeURIComponent (default: true) */
-  decode?: boolean;
-  /** Optional custom label formatter function for each segment */
-  transformLabel?: (segment: string) => string;
-  /** Label for the root/home breadcrumb item (default: "Dashboard") */
-  rootLabel?: string;
-};
+export type { PathBreadcrumb, PathCrumbOptions };
 
 /**
  * Converts a Next.js pathname into an array of breadcrumb items.
+ * Thin client wrapper around the RSC-safe `buildPathBreadcrumbs` helper.
  *
  * @param pathname - Current pathname (e.g., from `usePathname()` in Next.js App Router)
  * @param options - Configuration options for customizing the breadcrumb generation
@@ -47,76 +35,32 @@ export type PathCrumbOptions = {
  */
 export function usePathBreadcrumbs(
   pathname: string,
-  {
+  options: PathCrumbOptions = {}
+): PathBreadcrumb[] {
+  const {
     baseHref = "/",
     labelMap = {},
     exclude = [],
     decode = true,
     transformLabel,
     rootLabel = "Dashboard",
-  }: PathCrumbOptions = {}
-): PathBreadcrumb[] {
-  const excludeSet = React.useMemo(() => new Set(exclude), [exclude]);
+  } = options;
 
-  const parts = React.useMemo(() => {
-    if (typeof pathname !== "string") return [] as string[];
-    return pathname
-      .replace(/^\/+/, "")
-      .split("/")
-      .filter(Boolean)
-      .filter((seg) => !excludeSet.has(seg));
-  }, [pathname, excludeSet]);
+  const excludeKey = exclude.join("\0");
+  const labelMapKey = JSON.stringify(labelMap);
 
-  return React.useMemo(() => {
-    const items: PathBreadcrumb[] = [];
-
-    let href = baseHref.replace(/\/+$/, "");
-    if (!href.startsWith("/")) href = "/" + href;
-
-    if (!parts.length) {
-      return baseHref === "/"
-        ? [{ label: rootLabel }]
-        : [{ label: rootLabel, href: baseHref }];
-    }
-
-    items.push({ label: rootLabel, href: baseHref });
-
-    parts.forEach((seg, i) => {
-      href += `/${seg}`;
-      href = href.replace(/\/+/g, "/");
-
-      let raw: string;
-      if (decode) {
-        try {
-          raw = decodeURIComponent(seg);
-        } catch {
-          // If decoding fails (malformed URI), use original segment
-          raw = seg;
-        }
-      } else {
-        raw = seg;
-      }
-      const fallback = raw.replace(/-/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
-      let label: string;
-      if (labelMap[seg] !== undefined) {
-        label = labelMap[seg]!;
-      } else if (transformLabel) {
-        try {
-          label = transformLabel(raw);
-        } catch {
-          // If user callback throws, fall back to safe formatting
-          label = fallback;
-        }
-      } else {
-        label = fallback;
-      }
-
-      items.push({
-        label,
-        href: i < parts.length - 1 ? href : undefined,
-      });
-    });
-
-    return items;
-  }, [parts, baseHref, labelMap, decode, transformLabel, rootLabel]);
+  return React.useMemo(
+    () =>
+      buildPathBreadcrumbs(pathname, {
+        baseHref,
+        labelMap,
+        exclude,
+        decode,
+        transformLabel,
+        rootLabel,
+      }),
+    // labelMap / exclude compared via stable serialized keys
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [pathname, baseHref, labelMapKey, excludeKey, decode, transformLabel, rootLabel]
+  );
 }

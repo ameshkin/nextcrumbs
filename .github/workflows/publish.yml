@@ -1,0 +1,61 @@
+# Trusted Publishing (OIDC) for @ameshkin/nextcrumbs.
+# Setup once on npmjs.com → package → Settings → Trusted Publisher:
+#   Organization/user: ameshkin
+#   Repository: nextcrumbs
+#   Workflow filename: publish.yml
+# Requires npm CLI >= 11.5.1 and Node >= 22.14 on the runner.
+name: Publish
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+concurrency:
+  group: publish-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  publish:
+    name: npm publish (OIDC)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          registry-url: https://registry.npmjs.org
+          # Never cache package manager for release builds
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: CI checks
+        run: npm run ci
+
+      - name: Verify jsonld stays server-safe (no use client)
+        run: |
+          set -euo pipefail
+          head -n 1 dist/utils/jsonld.js | grep -vq 'use client'
+          head -n 1 dist/utils/buildPathBreadcrumbs.js | grep -vq 'use client'
+          head -n 1 dist/Breadcrumbs.js | grep -q 'use client'
+
+      - name: Publish
+        # Trusted publishing authenticates via OIDC. No NPM_TOKEN required.
+        # Provenance is generated automatically for public packages from public repos.
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ""

@@ -175,15 +175,74 @@ describe("Breadcrumbs props and edge cases", () => {
     expect(screen.getByText("Dashboard")).toBeInTheDocument();
   });
 
-  it("handles homeLabel matching different cases", () => {
+  it("applies homeLabel when href is the homeHref (not by label alone)", () => {
     const items = [
       { label: "HOME", href: "/" },
       { label: "Products" },
     ];
     render(<Breadcrumbs items={items} LinkComponent={TestLink} homeLabel="Home" />);
-    // The component matches case-insensitively (line 157: item.label.toLowerCase() === homeLabel.toLowerCase())
-    // So "HOME" matches "Home" and displays homeLabel ("Home")
+    // href === "/" triggers home treatment; displayed label becomes homeLabel
     expect(screen.getByText("Home")).toBeInTheDocument();
+  });
+
+  it("does not treat mid-trail label Home as the home icon target", () => {
+    const midTrail = [
+      { label: "App", href: "/app" },
+      { label: "Home", href: "/app/home" },
+      { label: "Settings" },
+    ];
+    const withRoot = [
+      { label: "Home", href: "/" },
+      { label: "App", href: "/app" },
+      { label: "Settings" },
+    ];
+    const mid = render(<Breadcrumbs items={midTrail} LinkComponent={TestLink} homeLabel="Home" />);
+    const root = render(<Breadcrumbs items={withRoot} LinkComponent={TestLink} homeLabel="Home" />);
+    // Mid-trail "Home" label must not get the automatic HomeIcon (only href === homeHref does).
+    expect(mid.container.querySelectorAll("svg").length).toBeLessThan(
+      root.container.querySelectorAll("svg").length
+    );
+    expect(screen.getAllByText("Home").length).toBeGreaterThan(0);
+  });
+
+  it("passes to and a native href when linkProp is to (right-click / open in new tab)", () => {
+    const received: Array<{ to?: string; href?: string }> = [];
+    const ToLink = React.forwardRef<
+      HTMLAnchorElement,
+      { to?: string; href?: string; children?: React.ReactNode }
+    >(function ToLink({ to, href, children }, ref) {
+      received.push({ to, href });
+      // Prefer native href so context-menu "Open in new tab" always has a URL.
+      return (
+        <a href={href ?? to} ref={ref} data-testid="rr-link">
+          {children}
+        </a>
+      );
+    });
+    const items = [
+      { label: "Home", href: "/" },
+      { label: "Docs", href: "/docs" },
+      { label: "API" },
+    ];
+    render(<Breadcrumbs items={items} LinkComponent={ToLink} linkProp="to" />);
+    const links = screen.getAllByRole("link");
+    expect(links).toHaveLength(2);
+    expect(links[0]).toHaveAttribute("href", "/");
+    expect(links[1]).toHaveAttribute("href", "/docs");
+    expect(received[0]).toEqual({ to: "/", href: "/" });
+    expect(received[1]).toEqual({ to: "/docs", href: "/docs" });
+  });
+
+  it("keeps native href when linkProp is href", () => {
+    const items = [
+      { label: "Home", href: "/" },
+      { label: "Docs", href: "/docs" },
+      { label: "API" },
+    ];
+    render(<Breadcrumbs items={items} LinkComponent={TestLink} linkProp="href" />);
+    const links = screen.getAllByRole("link");
+    expect(links[0]).toHaveAttribute("href", "/");
+    expect(links[1]).toHaveAttribute("href", "/docs");
   });
 });
 

@@ -2,19 +2,20 @@
 import * as React from "react"
 import { describe, it, expect } from "vitest"
 import { render, screen } from "@testing-library/react"
-import { MemoryRouter, Routes, Route, Link as RouterLink, type LinkProps } from "react-router-dom"
+import { MemoryRouter, Routes, Route, Link as RouterLink } from "react-router-dom"
 import Breadcrumbs from "../Breadcrumbs"
 import useReactRouterBreadcrumbs from "./useReactRouterBreadcrumbs"
 
-type AnchorLike = Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, "href"> & { href: string }
-
-const RRLink = React.forwardRef<HTMLAnchorElement, AnchorLike>(({ href, ...rest }, ref) => {
-  return <RouterLink ref={ref} to={href} {...(rest as Omit<LinkProps, "to">)} />
-})
-
 function Trail() {
   const items = useReactRouterBreadcrumbs({ rootLabel: "Home" })
-  return <Breadcrumbs LinkComponent={RRLink} items={items} ariaLabel="Breadcrumb" />
+  return (
+    <Breadcrumbs
+      LinkComponent={RouterLink}
+      linkProp="to"
+      items={items}
+      ariaLabel="Breadcrumb"
+    />
+  )
 }
 
 function EchoItems() {
@@ -67,7 +68,7 @@ describe("useReactRouterBreadcrumbs (hook-only)", () => {
   })
 
   it("works with useRRBreadcrumbs alias", async () => {
-    const { useRRBreadcrumbs } = await import("../index.js")
+    const { useRRBreadcrumbs } = await import("./useReactRouterBreadcrumbs.js")
     function EchoRRItems() {
       const items = useRRBreadcrumbs({ rootLabel: "Home" })
       return <div data-testid="rr-json">{JSON.stringify(items)}</div>
@@ -101,7 +102,29 @@ describe("useReactRouterBreadcrumbs (hook-only)", () => {
     )
 
     const json = screen.getByTestId("custom-root").textContent || "[]"
-    const items = JSON.parse(json) as Array<{ label: string }>
+    const items = JSON.parse(json) as Array<{ label: string; href?: string }>
     expect(items[0].label).toBe("Dashboard")
+    expect(items[0].href).toBeUndefined()
+  })
+
+  it("at root without rootLabel returns current Home crumb (no self-link)", () => {
+    function EchoRoot() {
+      const items = useReactRouterBreadcrumbs()
+      return <div data-testid="root-only">{JSON.stringify(items)}</div>
+    }
+
+    render(
+      <MemoryRouter initialEntries={["/"]}>
+        <Routes>
+          <Route path="*" element={<EchoRoot />} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    const items = JSON.parse(screen.getByTestId("root-only").textContent || "[]") as Array<{
+      label: string
+      href?: string
+    }>
+    expect(items).toEqual([{ label: "Home" }])
   })
 })

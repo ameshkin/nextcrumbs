@@ -1,0 +1,178 @@
+# Canonical CI for @ameshkin/nextcrumbs (README badges point here).
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build-and-test:
+    name: Build & Test (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        # Match package.json engines: >=20.19 <21 || >=22.12
+        node: ["20.19", "22"]
+    env:
+      CI: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node ${{ matrix.node }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+          registry-url: https://registry.npmjs.org
+
+      - name: Install
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit tests
+        run: npm run test:run
+
+      - name: Build
+        run: npm run build
+
+      - name: Verify package exports ship dist/
+        run: |
+          set -euo pipefail
+          node <<'EOF'
+          const fs = require("node:fs");
+          const path = require("node:path");
+          const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
+          const errors = [];
+
+          const mustStartWithDist = (label, value) => {
+            if (typeof value !== "string" || !value.startsWith("./dist/")) {
+              errors.push(`${label} must start with ./dist/ (got ${JSON.stringify(value)})`);
+            }
+          };
+
+          mustStartWithDist("main", pkg.main);
+          mustStartWithDist("module", pkg.module);
+          mustStartWithDist("types", pkg.types);
+
+          if (!pkg.exports || typeof pkg.exports !== "object") {
+            errors.push("exports is missing");
+          } else {
+            const walk = (obj, keyPath) => {
+              if (typeof obj === "string") {
+                if (obj.includes("/public/")) {
+                  errors.push(`${keyPath} points at public/ (${obj})`);
+                }
+                // Allow "./package.json" metadata export; everything else must be dist/
+                if (obj !== "./package.json" && !obj.startsWith("./dist/")) {
+                  errors.push(`${keyPath} must start with ./dist/ (${obj})`);
+                }
+                return;
+              }
+              if (obj && typeof obj === "object") {
+                for (const [k, v] of Object.entries(obj)) walk(v, `${keyPath}.${k}`);
+              }
+            };
+            walk(pkg.exports, "exports");
+          }
+
+          if (!Array.isArray(pkg.files) || !pkg.files.includes("dist")) {
+            errors.push('files[] must include "dist"');
+          }
+
+          for (const rel of [
+            "dist/index.js",
+            "dist/index.d.ts",
+            "dist/Breadcrumbs.js",
+            "dist/hooks/usePathBreadcrumbs.js",
+            "dist/hooks/useReactRouterBreadcrumbs.js",
+            "dist/utils/jsonld.js",
+            "dist/utils/buildPathBreadcrumbs.js",
+          ]) {
+            if (!fs.existsSync(path.join(process.cwd(), rel))) {
+              errors.push(`missing build artifact: ${rel}`);
+            }
+          }
+
+          const mustBeClient = ["dist/Breadcrumbs.js", "dist/hooks/usePathBreadcrumbs.js"];
+          const mustNotBeClient = ["dist/utils/jsonld.js", "dist/utils/buildPathBreadcrumbs.js"];
+          for (const rel of mustBeClient) {
+            const head = fs.readFileSync(rel, "utf8").slice(0, 20);
+            if (!head.includes("use client")) errors.push(`${rel} must start with "use client"`);
+          }
+          for (const rel of mustNotBeClient) {
+            const head = fs.readFileSync(rel, "utf8").slice(0, 20);
+            if (head.includes("use client")) errors.push(`${rel} must NOT have "use client"`);
+          }
+
+          if (errors.length) {
+            console.error("Package export verification failed:");
+            for (const e of errors) console.error(` - ${e}`);
+            process.exit(1);
+          }
+          console.log("Package exports OK (dist/)");
+          EOF
+          npm pack --dry-run
+
+  # Lightweight job for the README "install test" badge (same workflow file).
+  install-smoke:
+    name: Install smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: build-and-test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Pack and install into a clean consumer
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run build
+          TARBALL="$(npm pack --silent)"
+          mkdir -p /tmp/nextcrumbs-consumer
+          cd /tmp/nextcrumbs-consumer
+          npm init -y >/dev/null
+          npm install "$GITHUB_WORKSPACE/$TARBALL" \
+            react@18 react-dom@18 \
+            @mui/material@^7 @mui/icons-material@^7 \
+            @emotion/react@^11 @emotion/styled@^11
+          node --input-type=module <<'EOF'
+          import { createRequire } from "node:module";
+          const require = createRequire(import.meta.url);
+          const pkg = require("@ameshkin/nextcrumbs/package.json");
+          if (!pkg.main?.startsWith("./dist/")) {
+            throw new Error(`Installed package main is wrong: ${pkg.main}`);
+          }
+          const mod = await import("@ameshkin/nextcrumbs");
+          for (const name of ["Breadcrumbs", "NextCrumb", "usePathBreadcrumbs", "toJsonLd"]) {
+            if (typeof mod[name] === "undefined") {
+              throw new Error(`Missing export: ${name}`);
+            }
+          }
+          console.log("Consumer install OK", pkg.version);
+          EOF

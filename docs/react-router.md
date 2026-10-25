@@ -1,15 +1,31 @@
 # NextCrumbs • React Router
-Use `useReactRouterBreadcrumbs` to derive breadcrumb items from the current location. Install the optional peer if you haven’t:
+
+Use `useReactRouterBreadcrumbs` to derive breadcrumb items from the current location.
+
+## Install
+
+```bash
+npm i react-router-dom
+```
+
+`react-router-dom` is an **optional peer**. Import the hook from the **subpath** only:
+
+```ts
+import { useReactRouterBreadcrumbs, useRRBreadcrumbs } from "@ameshkin/nextcrumbs/hooks/useReactRouterBreadcrumbs";
+```
+
+As of **0.2.1**, this hook is **not** re-exported from `@ameshkin/nextcrumbs` so Next.js apps never resolve React Router unless they opt in.
 
 ## Quick demo
 
 ```tsx
-import { MemoryRouter, Routes, Route } from "react-router-dom"
-import { Breadcrumbs, useReactRouterBreadcrumbs } from "@ameshkin/nextcrumbs"
+import { MemoryRouter, Routes, Route, Link as RouterLink } from "react-router-dom";
+import { Breadcrumbs } from "@ameshkin/nextcrumbs";
+import { useReactRouterBreadcrumbs } from "@ameshkin/nextcrumbs/hooks/useReactRouterBreadcrumbs";
 
 function Trail() {
-  const items = useReactRouterBreadcrumbs({ rootLabel: "Home" })
-  return <Breadcrumbs items={items} />
+  const items = useReactRouterBreadcrumbs({ rootLabel: "Home" });
+  return <Breadcrumbs LinkComponent={RouterLink} linkProp="to" items={items} />;
 }
 
 export default function Demo() {
@@ -20,21 +36,24 @@ export default function Demo() {
         <Route path="/catalog/hats" element={<Trail />} />
       </Routes>
     </MemoryRouter>
-  )
+  );
 }
 ```
 
 ## With SPA navigation (Router `<Link>`)
 
-Pass React Router’s `<Link>` as `LinkComponent` so breadcrumb links use client-side navigation:
+Pass React Router's `<Link>` as `LinkComponent` and set **`linkProp="to"`**.
+
+NextCrumbs still sets a native **`href`** on every crumb link so right-click "Open in new tab", middle-click, and "Copy link" work. `to` drives SPA navigation.
 
 ```tsx
-import { Link as RouterLink, BrowserRouter, Routes, Route } from "react-router-dom"
-import { Breadcrumbs, useReactRouterBreadcrumbs } from "@ameshkin/nextcrumbs"
+import { Link as RouterLink, BrowserRouter, Routes, Route } from "react-router-dom";
+import { Breadcrumbs } from "@ameshkin/nextcrumbs";
+import { useReactRouterBreadcrumbs } from "@ameshkin/nextcrumbs/hooks/useReactRouterBreadcrumbs";
 
 function Trail() {
-  const items = useReactRouterBreadcrumbs({ rootLabel: "Home" })
-  return <Breadcrumbs LinkComponent={RouterLink} items={items} />
+  const items = useReactRouterBreadcrumbs({ rootLabel: "Home" });
+  return <Breadcrumbs LinkComponent={RouterLink} linkProp="to" items={items} />;
 }
 
 export default function App() {
@@ -45,7 +64,7 @@ export default function App() {
         <Route path="/catalog/hats" element={<Trail />} />
       </Routes>
     </BrowserRouter>
-  )
+  );
 }
 ```
 
@@ -53,37 +72,43 @@ export default function App() {
 
 ```ts
 type ReactRouterBreadcrumbsOptions = {
-  rootLabel?: string
-  basePath?: string
-  decode?: boolean
-  exclude?: (string | RegExp)[]
-  mapSegmentLabel?: (segment: string, index: number, segments: string[]) => string | null
-}
+  rootLabel?: string;
+  basePath?: string;
+  decode?: boolean;
+  exclude?: (string | RegExp)[];
+  mapSegmentLabel?: (
+    segment: string,
+    index: number,
+    segments: string[]
+  ) => string | null;
+};
 ```
 
 | Option            | Type                                           | Default | Description                                        |
 | ----------------- | ---------------------------------------------- | ------- | -------------------------------------------------- |
-| `rootLabel`       | `string`                                       | —       | If set, prepends a crumb linking to `/`.           |
-| `basePath`        | `string`                                       | —       | Strips a leading base path before building crumbs. |
+| `rootLabel`       | `string`                                       | -       | If set, prepends a crumb linking to `/`.           |
+| `basePath`        | `string`                                       | -       | Strips a leading base path before building crumbs. |
 | `decode`          | `boolean`                                      | `true`  | Applies `decodeURIComponent` to each segment.      |
 | `exclude`         | `(string \| RegExp)[]`                         | `[]`    | Skips segments that match a string or regex.       |
-| `mapSegmentLabel` | `(segment, index, segments) => string \| null` | —       | Return a custom label or `null` to hide a segment. |
+| `mapSegmentLabel` | `(segment, index, segments) => string \| null` | -       | Return a custom label or `null` to hide a segment. |
 
 ## Examples
 
 ### Exclude private routes and prettify labels
 
 ```tsx
-import { Link as RouterLink } from "react-router-dom"
-import { Breadcrumbs, useReactRouterBreadcrumbs } from "@ameshkin/nextcrumbs"
+import { Link as RouterLink } from "react-router-dom";
+import { Breadcrumbs } from "@ameshkin/nextcrumbs";
+import { useReactRouterBreadcrumbs } from "@ameshkin/nextcrumbs/hooks/useReactRouterBreadcrumbs";
 
 export default function Trail() {
   const items = useReactRouterBreadcrumbs({
     rootLabel: "Home",
     exclude: [/^_/],
-    mapSegmentLabel: (seg) => seg.replace(/[-_]+/g, " ").replace(/\b\w/g, c => c.toUpperCase())
-  })
-  return <Breadcrumbs LinkComponent={RouterLink} items={items} />
+    mapSegmentLabel: (seg) =>
+      seg.replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+  });
+  return <Breadcrumbs LinkComponent={RouterLink} linkProp="to" items={items} />;
 }
 ```
 
@@ -92,22 +117,30 @@ export default function Trail() {
 ```tsx
 const items = useReactRouterBreadcrumbs({
   rootLabel: "Home",
-  basePath: "/app"
-})
+  basePath: "/app",
+});
+```
+
+### Alias
+
+```ts
+import { useRRBreadcrumbs } from "@ameshkin/nextcrumbs/hooks/useReactRouterBreadcrumbs";
+// same as useReactRouterBreadcrumbs
 ```
 
 ## Testing tip
 
-When testing with Vitest/RTL, wrap your component with a memory or browser router:
+Wrap with a memory or browser router:
 
 ```tsx
-import { render, screen } from "@testing-library/react"
-import { MemoryRouter, Routes, Route } from "react-router-dom"
-import { Breadcrumbs, useReactRouterBreadcrumbs } from "@ameshkin/nextcrumbs"
+import { render, screen } from "@testing-library/react";
+import { MemoryRouter, Routes, Route } from "react-router-dom";
+import { Breadcrumbs } from "@ameshkin/nextcrumbs";
+import { useReactRouterBreadcrumbs } from "@ameshkin/nextcrumbs/hooks/useReactRouterBreadcrumbs";
 
 function Trail() {
-  const items = useReactRouterBreadcrumbs({ rootLabel: "Home" })
-  return <Breadcrumbs items={items} />
+  const items = useReactRouterBreadcrumbs({ rootLabel: "Home" });
+  return <Breadcrumbs items={items} />;
 }
 
 it("renders trail", () => {
@@ -117,12 +150,14 @@ it("renders trail", () => {
         <Route path="/*" element={<Trail />} />
       </Routes>
     </MemoryRouter>
-  )
-  expect(screen.getByText("Home")).toBeInTheDocument()
-})
+  );
+  expect(screen.getByText("Home")).toBeInTheDocument();
+});
 ```
 
 ## Notes
 
-* `react-router-dom` is an optional peer; install it only if you use the router hook.
-* For SPA navigation, pass `LinkComponent={RouterLink}` to `<Breadcrumbs>`. Without it, links render as plain anchors.
+* Install `react-router-dom` only if you use this subpath.
+* For SPA navigation, pass `LinkComponent={RouterLink}` and `linkProp="to"`. Crumbs always keep a native `href` for browser context menus; `to` is added for React Router.
+* Your `LinkComponent` must render a real `<a>` (or forward `href` to one). Otherwise right-click open will not work.
+* Do not import this hook from the main `@ameshkin/nextcrumbs` barrel (removed in 0.2.1).

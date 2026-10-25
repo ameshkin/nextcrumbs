@@ -110,7 +110,7 @@ describe("Breadcrumbs", () => {
 
   it("handles items with only href and no label", () => {
     const itemsWithHrefOnly = [
-      { href: "/" },
+      { label: "", href: "/" },
       { label: "Products", href: "/products" },
     ];
     render(<Breadcrumbs items={itemsWithHrefOnly} LinkComponent={TestLink} />);

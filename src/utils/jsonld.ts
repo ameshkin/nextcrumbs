@@ -14,7 +14,11 @@ export type JsonLdBreadcrumb = {
  * Options for generating JSON-LD structured data.
  */
 export type JsonLdOptions = {
-  /** Base URL origin for resolving relative hrefs (default: "https://example.com") */
+  /**
+   * Base URL origin for resolving relative hrefs (for example `https://yoursite.com`).
+   * Required to emit `item` URLs for relative paths. Absolute `http(s)` hrefs work without it.
+   * There is no `example.com` default (avoids shipping bad SEO by accident).
+   */
   origin?: string;
 };
 
@@ -38,12 +42,27 @@ function safeStringify(value: unknown): string {
   try {
     return JSON.stringify(value);
   } catch {
-    // Fallback to an empty BreadcrumbList if something goes wrong
     return JSON.stringify({
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
       itemListElement: [],
     });
+  }
+}
+
+function isAbsoluteHttpUrl(href: string): boolean {
+  return /^https?:\/\//i.test(href);
+}
+
+function resolveItemUrl(href: string, origin?: string): string | undefined {
+  try {
+    if (isAbsoluteHttpUrl(href)) {
+      return new URL(href).toString();
+    }
+    if (!origin) return undefined;
+    return new URL(href, origin).toString();
+  } catch {
+    return undefined;
   }
 }
 
@@ -65,8 +84,7 @@ function safeStringify(value: unknown): string {
  *   { name: "New Product" }
  * ];
  *
- * const jsonLd = toJsonLd(crumbs, { origin: "https://example.com" });
- * // Use with: <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+ * const jsonLd = toJsonLd(crumbs, { origin: "https://yoursite.com" });
  * ```
  */
 export function toJsonLd(
@@ -82,8 +100,7 @@ export function toJsonLd(
     item?: string;
   }>;
 } {
-  const { origin = "https://example.com" } = options;
-
+  const { origin } = options;
   const safe = safeCrumbs(crumbs);
 
   return {
@@ -100,56 +117,49 @@ export function toJsonLd(
         position: index + 1,
         name: crumb.name,
       };
-      
+
       if (crumb.href) {
-        try {
-          item.item = new URL(crumb.href, origin).toString();
-        } catch {
-          // If URL construction fails, skip the item property
-          // This prevents DoS attacks from malformed URLs
-        }
+        const resolved = resolveItemUrl(crumb.href, origin);
+        if (resolved) item.item = resolved;
       }
-      
+
       return item;
     }),
   };
 }
 
+function resolveClientOrigin(origin?: string): string | undefined {
+  if (origin) return origin;
+  if (typeof window !== "undefined" && window.location?.origin) {
+    return window.location.origin;
+  }
+  return undefined;
+}
+
 /**
  * React component that renders a JSON-LD script tag for breadcrumb structured data.
  *
- * @param props - Component props
  * @param props.crumbs - Array of breadcrumb items with `name` and optional `href`
- * @param props.origin - Base URL origin for resolving relative hrefs (default: "https://example.com")
+ * @param props.origin - Base URL origin for resolving relative hrefs.
+ *   In the browser, falls back to `window.location.origin` when omitted.
+ *   On the server, pass `origin` explicitly so relative URLs resolve.
  *
  * @example
  * ```tsx
  * import { BreadcrumbJsonLd } from "@ameshkin/nextcrumbs";
  *
- * function MyPage() {
- *   const crumbs = [
- *     { name: "Home", href: "/" },
- *     { name: "Products", href: "/products" },
- *     { name: "New Product" }
- *   ];
- *
- *   return (
- *     <>
- *       <BreadcrumbJsonLd crumbs={crumbs} origin="https://example.com" />
- *       <Breadcrumbs items={crumbs.map(c => ({ label: c.name, href: c.href }))} />
- *     </>
- *   );
- * }
+ * <BreadcrumbJsonLd crumbs={crumbs} origin="https://yoursite.com" />
  * ```
  */
 export function BreadcrumbJsonLd({
   crumbs,
-  origin = "https://example.com",
+  origin,
 }: {
   crumbs: JsonLdBreadcrumb[] | unknown;
   origin?: string;
 }): React.JSX.Element {
-  const json = React.useMemo(() => toJsonLd(crumbs, { origin }), [crumbs, origin]);
+  const resolvedOrigin = resolveClientOrigin(origin);
+  const json = toJsonLd(crumbs, { origin: resolvedOrigin });
   return React.createElement("script", {
     type: "application/ld+json",
     dangerouslySetInnerHTML: { __html: safeStringify(json) },
@@ -159,35 +169,15 @@ export function BreadcrumbJsonLd({
 /**
  * Helper function to convert `BreadcrumbItem` objects (from the Breadcrumbs component)
  * to `JsonLdBreadcrumb` format for JSON-LD generation.
- *
- * @param items - Array of `BreadcrumbItem` objects from the Breadcrumbs component
- * @returns Array of `JsonLdBreadcrumb` objects suitable for JSON-LD
- *
- * @example
- * ```tsx
- * import { Breadcrumbs, breadcrumbsToJsonLd, BreadcrumbJsonLd } from "@ameshkin/nextcrumbs";
- *
- * function MyPage() {
- *   const items = [
- *     { label: "Home", href: "/" },
- *     { label: "Products", href: "/products" },
- *     { label: "New Product" }
- *   ];
- *
- *   return (
- *     <>
- *       <BreadcrumbJsonLd crumbs={breadcrumbsToJsonLd(items)} origin="https://example.com" />
- *       <Breadcrumbs items={items} />
- *     </>
- *   );
- * }
- * ```
  */
 export function breadcrumbsToJsonLd(items: BreadcrumbItem[] | unknown): JsonLdBreadcrumb[] {
   if (!Array.isArray(items)) return [];
-  return items.map((item) => ({
-    name: String((item as BreadcrumbItem).label),
-    href: (item as BreadcrumbItem).href,
-  }));
+  return items
+    .filter((item): item is BreadcrumbItem => {
+      return item != null && typeof item === "object" && typeof (item as BreadcrumbItem).label === "string";
+    })
+    .map((item) => ({
+      name: item.label,
+      href: item.href,
+    }));
 }
-

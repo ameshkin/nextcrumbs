@@ -1,8 +1,49 @@
-# NextCrumbs • Vanilla React / JSON-LD
+# NextCrumbs • Vite, vanilla React, JSON-LD
 
-Use `<Breadcrumbs>` without any router, or add page-level JSON-LD for static SEO.
+Use `<Breadcrumbs>` in **Vite**, CRA, or any React app **without Next.js**. Add page-level JSON-LD when you need SEO.
 
-## Manual items (no router)
+Requires MUI and Emotion peers. Does **not** require Next.js. React Router is optional (see [react-router.md](./react-router.md)).
+
+## Vite (or any bundler)
+
+```bash
+npm i @ameshkin/nextcrumbs @mui/material @mui/icons-material @emotion/react @emotion/styled
+```
+
+No Vite plugin. Import the ESM package and render under your existing `ThemeProvider`:
+
+```tsx
+import { Breadcrumbs } from "@ameshkin/nextcrumbs";
+
+export function HeaderTrail() {
+  return (
+    <Breadcrumbs
+      items={[
+        { label: "Home", href: "/" },
+        { label: "Docs", href: "/docs" },
+        { label: "API" }
+      ]}
+    />
+  );
+}
+```
+
+### Vite + React Router
+
+```tsx
+import { Link as RouterLink } from "react-router-dom";
+import { Breadcrumbs } from "@ameshkin/nextcrumbs";
+import { useReactRouterBreadcrumbs } from "@ameshkin/nextcrumbs/hooks/useReactRouterBreadcrumbs";
+
+export function Trail() {
+  const items = useReactRouterBreadcrumbs({ rootLabel: "Home" });
+  return <Breadcrumbs LinkComponent={RouterLink} linkProp="to" items={items} />;
+}
+```
+
+You can also feed `usePathBreadcrumbs(useLocation().pathname)` if you prefer the path helper over the React Router subpath hook.
+
+## Manual items
 
 ```tsx
 import { Breadcrumbs } from "@ameshkin/nextcrumbs";
@@ -18,74 +59,97 @@ export default function ManualTrail() {
     />
   );
 }
-````
-
-* Omit `LinkComponent` to render standard anchors for items with `href`.
-* The last item should generally have no `href` (current page).
-
-## JSON-LD at the page level
-
-Add static structured data with a `<script type="application/ld+json">` tag. This is independent of the visual breadcrumbs component.
-
-```tsx
-import * as React from "react";
-
-type Crumb = { name: string; href?: string };
-
-function toJsonLd(crumbs: Crumb[], origin = "https://example.com") {
-  return {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: crumbs.map((c, i) => ({
-      "@type": "ListItem",
-      position: i + 1,
-      name: c.name,
-      ...(c.href ? { item: new URL(c.href, origin).toString() } : {})
-    }))
-  };
-}
-
-export function BreadcrumbJsonLd({ crumbs, origin }: { crumbs: Crumb[]; origin?: string }) {
-  const json = React.useMemo(() => toJsonLd(crumbs, origin), [crumbs, origin]);
-  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(json) }} />;
-}
 ```
 
-Usage:
+* Omit `LinkComponent` to use the default MUI link for items with `href`.
+* Prefer omitting `href` on the last item (current page). The last crumb is never rendered as a link even if `href` is present.
+* `"use client"` is a Next.js App Router directive. You do not need it in Vite.
+
+## JSON-LD
+
+Always pass a real site origin for relative paths. There is no `example.com` default.
+
+### One-shot on `<Breadcrumbs>`
 
 ```tsx
 import { Breadcrumbs } from "@ameshkin/nextcrumbs";
-import { BreadcrumbJsonLd } from "./BreadcrumbJsonLd";
+
+<Breadcrumbs
+  items={items}
+  jsonLdOrigin="https://yoursite.com"
+/>
+```
+
+### Explicit helpers
+
+```tsx
+import {
+  Breadcrumbs,
+  BreadcrumbJsonLd,
+  breadcrumbsToJsonLd,
+} from "@ameshkin/nextcrumbs";
 
 export default function DocsPage() {
-  const crumbs = [
-    { name: "Home", href: "/" },
-    { name: "Docs", href: "/docs" },
-    { name: "API" }
+  const items = [
+    { label: "Home", href: "/" },
+    { label: "Docs", href: "/docs" },
+    { label: "API" },
   ];
 
   return (
     <>
-      <BreadcrumbJsonLd crumbs={crumbs} origin="https://example.com" />
-      <Breadcrumbs
-        items={[
-          { label: "Home", href: "/" },
-          { label: "Docs", href: "/docs" },
-          { label: "API" }
-        ]}
+      <BreadcrumbJsonLd
+        crumbs={breadcrumbsToJsonLd(items)}
+        origin="https://yoursite.com"
       />
+      <Breadcrumbs items={items} />
     </>
   );
 }
 ```
 
-## Styling and density
+### `toJsonLd`
 
-Pass any MUI Breadcrumbs props through `muiProps`:
+```tsx
+import { toJsonLd } from "@ameshkin/nextcrumbs";
+
+const jsonLd = toJsonLd(
+  [
+    { name: "Home", href: "/" },
+    { name: "Docs", href: "/docs" },
+    { name: "API" },
+  ],
+  { origin: "https://yoursite.com" }
+);
+```
+
+| Input | Result |
+| --- | --- |
+| Relative `href` without `origin` | `item` omitted (safe) |
+| Absolute `http(s)` `href` | Resolved without `origin` |
+| Relative `href` with `origin` | Resolved against that origin |
+| `BreadcrumbJsonLd` in the browser without `origin` | Uses `window.location.origin` |
+
+Subpath import:
+
+```ts
+import {
+  toJsonLd,
+  BreadcrumbJsonLd,
+  breadcrumbsToJsonLd,
+} from "@ameshkin/nextcrumbs/utils/jsonld";
+```
+
+## Layout controls
 
 ```tsx
 <Breadcrumbs
-  muiProps={{ maxItems: 4, itemsBeforeCollapse: 1, itemsAfterCollapse: 1 }}
+  dense
+  size="small"
+  truncate={140}
+  maxItems={4}
+  itemsBeforeCollapse={1}
+  itemsAfterCollapse={1}
   items={[
     { label: "Home", href: "/" },
     { label: "Docs", href: "/docs" },
@@ -95,9 +159,9 @@ Pass any MUI Breadcrumbs props through `muiProps`:
 />
 ```
 
-## Testing (Vitest + RTL)
+Default root margin is `0`. Set spacing with `sx` when needed.
 
-Render the component directly—no router needed:
+## Testing (Vitest + RTL)
 
 ```tsx
 import { render, screen } from "@testing-library/react";
@@ -119,5 +183,6 @@ it("renders a non-link last crumb", () => {
 
 ## Tips
 
-* Prefer **page-level JSON-LD** for static SEO markup (see example above).
-* Keep labels human-readable; reserve slugs for `href`.
+* Keep labels human-readable. Put slugs in `href`.
+* External crumbs: set `external: true` for `target="_blank"` and `rel="noopener noreferrer"`.
+* Home icon applies only when `href === homeHref` (default `"/"`), not when the label happens to say "Home".
