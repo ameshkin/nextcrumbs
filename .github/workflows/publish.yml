@@ -1,8 +1,9 @@
 # Trusted Publishing (OIDC) for @ameshkin/nextcrumbs.
-# Setup once on npmjs.com → package → Settings → Trusted Publisher:
+# npmjs.com Trusted Publisher must match:
 #   Organization/user: ameshkin
 #   Repository: nextcrumbs
 #   Workflow filename: publish.yml
+#   Environment name: (leave empty; this job does not set `environment:`)
 # Requires npm CLI >= 11.5.1 and Node >= 22.14 on the runner.
 name: Publish
 
@@ -28,6 +29,9 @@ jobs:
     name: npm publish (OIDC)
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -35,10 +39,17 @@ jobs:
       - name: Setup Node 22
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: "22.14"
           registry-url: https://registry.npmjs.org
           # Never cache package manager for release builds
           cache: npm
+
+      - name: Ensure npm supports OIDC trusted publishing
+        run: |
+          set -euo pipefail
+          npm install -g npm@^11.5.1
+          node -v
+          npm -v
 
       - name: Install
         run: npm ci
@@ -54,8 +65,6 @@ jobs:
           head -n 1 dist/Breadcrumbs.js | grep -q 'use client'
 
       - name: Publish
-        # Trusted publishing authenticates via OIDC. No NPM_TOKEN required.
-        # Provenance is generated automatically for public packages from public repos.
+        # Trusted publishing authenticates via OIDC. Do not set NODE_AUTH_TOKEN
+        # (empty or otherwise). An empty token makes npm skip OIDC and fail ENEEDAUTH.
         run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ""
