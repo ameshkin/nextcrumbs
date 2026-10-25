@@ -13,9 +13,9 @@
 
 ### Documentation refresh (0.2.1)
 
-- Root README rewritten for 0.2.1: version warning, Emotion peers, subpath table, full prop list (`dense`, `ariaLabel`, sx slots), troubleshooting for broken 0.2.0 and MUI peer conflicts.
-- Guides updated: `docs/next-router.md`, `docs/react-router.md` (subpath-only), `docs/vanilla-json.md` (package JSON-LD helpers), `docs/gitlab.md` (dist exports + pin 0.2.1).
-- Added `docs/README.md` index.
+- Root README rewritten for 0.2.1: version warning, Emotion peers, subpath table, full prop list (`dense`, `ariaLabel`, sx slots, `linkProp`, `jsonLdOrigin`, `size`, `truncate`), troubleshooting for broken 0.2.0 and MUI peer conflicts.
+- Guides updated for RSC `buildPathBreadcrumbs`, React Router `linkProp="to"` + native `href`, JSON-LD origin rules, and first-class collapse props.
+- Classification tests cover false positives (over-match) and false negatives (under-match) for home icon, last-crumb links, JSON-LD origins, and routing props.
 - Removed outdated claims (lazy-loading React Router, installing RR as a Next.js workaround, `>=7` MUI peers).
 
 ### 0.2.1 - package fix (do not use 0.2.0)

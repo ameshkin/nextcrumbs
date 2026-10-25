@@ -136,7 +136,7 @@ export default function AutoTrail() {
 See full guide: [`docs/react-router.md`](./docs/react-router.md)
 
 ```tsx
-import { MemoryRouter, Routes, Route } from "react-router-dom";
+import { MemoryRouter, Routes, Route, Link as RouterLink } from "react-router-dom";
 import { Breadcrumbs } from "@ameshkin/nextcrumbs";
 import { useReactRouterBreadcrumbs } from "@ameshkin/nextcrumbs/hooks/useReactRouterBreadcrumbs";
 
@@ -145,7 +145,7 @@ function Trail() {
     rootLabel: "Home",
     exclude: [/^_/]
   });
-  return <Breadcrumbs items={items} />;
+  return <Breadcrumbs LinkComponent={RouterLink} linkProp="to" items={items} />;
 }
 
 export default function Demo() {
@@ -160,7 +160,7 @@ export default function Demo() {
 }
 ```
 
-`react-router-dom` is an **optional peer**. Import the hook only from `@ameshkin/nextcrumbs/hooks/useReactRouterBreadcrumbs` (alias: `useRRBreadcrumbs`). The main package entry does **not** import React Router.
+`react-router-dom` is an **optional peer**. Import the hook only from `@ameshkin/nextcrumbs/hooks/useReactRouterBreadcrumbs` (alias: `useRRBreadcrumbs`). Use `linkProp="to"` so React Router receives `to` while a native `href` remains for right-click open. The main package entry does **not** import React Router.
 
 ---
 
@@ -168,7 +168,7 @@ export default function Demo() {
 
 | Import path | Contents |
 | --- | --- |
-| `@ameshkin/nextcrumbs` | `Breadcrumbs`, `NextCrumb`, `usePathBreadcrumbs`, JSON-LD helpers + types |
+| `@ameshkin/nextcrumbs` | `Breadcrumbs`, `NextCrumb`, `usePathBreadcrumbs`, `buildPathBreadcrumbs`, `getLinkRoutingProps`, JSON-LD helpers + types |
 | `@ameshkin/nextcrumbs/breadcrumbs` | Component only |
 | `@ameshkin/nextcrumbs/hooks/usePathBreadcrumbs` | Path helper (client hook) |
 | `@ameshkin/nextcrumbs/hooks/useReactRouterBreadcrumbs` | React Router helper (`useReactRouterBreadcrumbs`, `useRRBreadcrumbs`) |
@@ -202,7 +202,9 @@ Published files live under **`dist/`** (`main` / `types` / `exports` all point t
 | `sx`            | `SxProps<Theme>`                                                                                 | -                    | Root styles (default margin is `0`).                      |
 | `itemSx` / `linkSx` / `currentSx` / `contentSx` / `iconSx` / `labelSx` | `SxProps<Theme>` | - | Style slots for crumbs. |
 
-### `usePathBreadcrumbs(pathname, options?)`
+### `usePathBreadcrumbs(pathname, options?)` / `buildPathBreadcrumbs(pathname, options?)`
+
+Same options. Prefer `buildPathBreadcrumbs` in Server Components (`@ameshkin/nextcrumbs/utils/buildPathBreadcrumbs`).
 
 | Option           | Type                              | Default        | Description                         |
 | ---------------- | --------------------------------- | -------------- | ----------------------------------- |
@@ -256,33 +258,25 @@ import { Breadcrumbs } from "@ameshkin/nextcrumbs";
 
 ### JSON-LD Structured Data
 
+Pass your real origin. Relative hrefs are left unresolved if `origin` is omitted (no `example.com` default).
+
 ```tsx
-import { Breadcrumbs, BreadcrumbJsonLd, breadcrumbsToJsonLd } from "@ameshkin/nextcrumbs";
+import { Breadcrumbs } from "@ameshkin/nextcrumbs";
 
-function MyPage() {
-  const items = [
-    { label: "Home", href: "/" },
-    { label: "Products", href: "/products" },
-    { label: "New Product" }
-  ];
-
-  return (
-    <>
-      <BreadcrumbJsonLd crumbs={breadcrumbsToJsonLd(items)} origin="https://example.com" />
-      <Breadcrumbs items={items} />
-    </>
-  );
-}
+<Breadcrumbs items={items} jsonLdOrigin="https://yoursite.com" LinkComponent={Link} />
 ```
 
-Or build the object yourself:
+Or use the helpers:
 
 ```tsx
-import { toJsonLd } from "@ameshkin/nextcrumbs";
+import { Breadcrumbs, BreadcrumbJsonLd, breadcrumbsToJsonLd, toJsonLd } from "@ameshkin/nextcrumbs";
+
+<BreadcrumbJsonLd crumbs={breadcrumbsToJsonLd(items)} origin="https://yoursite.com" />
+<Breadcrumbs items={items} />
 
 const jsonLd = toJsonLd(
   [{ name: "Home", href: "/" }, { name: "Products" }],
-  { origin: "https://example.com" }
+  { origin: "https://yoursite.com" }
 );
 ```
 

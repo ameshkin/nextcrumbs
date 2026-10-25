@@ -1,10 +1,10 @@
 # NextCrumbs • Vanilla React / JSON-LD
 
-Use `<Breadcrumbs>` without any router, or add page-level JSON-LD for static SEO.
+Use `<Breadcrumbs>` without a router, or add page-level JSON-LD for SEO.
 
-Requires MUI + Emotion peers. Does **not** require Next.js or React Router.
+Requires MUI and Emotion peers. Does **not** require Next.js or React Router.
 
-## Manual items (no router)
+## Manual items
 
 ```tsx
 import { Breadcrumbs } from "@ameshkin/nextcrumbs";
@@ -23,11 +23,24 @@ export default function ManualTrail() {
 ```
 
 * Omit `LinkComponent` to use the default MUI link for items with `href`.
-* The last item should generally have no `href` (current page).
+* Prefer omitting `href` on the last item (current page). The last crumb is never rendered as a link even if `href` is present.
 
-## JSON-LD with built-in helpers
+## JSON-LD
 
-Prefer the package helpers instead of hand-rolling schema.org markup:
+Always pass a real site origin for relative paths. There is no `example.com` default.
+
+### One-shot on `<Breadcrumbs>`
+
+```tsx
+import { Breadcrumbs } from "@ameshkin/nextcrumbs";
+
+<Breadcrumbs
+  items={items}
+  jsonLdOrigin="https://yoursite.com"
+/>
+```
+
+### Explicit helpers
 
 ```tsx
 import {
@@ -47,7 +60,7 @@ export default function DocsPage() {
     <>
       <BreadcrumbJsonLd
         crumbs={breadcrumbsToJsonLd(items)}
-        origin="https://example.com"
+        origin="https://yoursite.com"
       />
       <Breadcrumbs items={items} />
     </>
@@ -56,8 +69,6 @@ export default function DocsPage() {
 ```
 
 ### `toJsonLd`
-
-Build the object yourself (for custom script injection or server rendering):
 
 ```tsx
 import { toJsonLd } from "@ameshkin/nextcrumbs";
@@ -68,25 +79,16 @@ const jsonLd = toJsonLd(
     { name: "Docs", href: "/docs" },
     { name: "API" },
   ],
-  { origin: "https://example.com" }
+  { origin: "https://yoursite.com" }
 );
-
-// <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
 ```
 
-### `breadcrumbsToJsonLd`
-
-Maps `{ label, href? }` visual items into `{ name, href? }` JSON-LD crumbs:
-
-```ts
-import { breadcrumbsToJsonLd, toJsonLd } from "@ameshkin/nextcrumbs";
-
-const crumbs = breadcrumbsToJsonLd([
-  { label: "Home", href: "/" },
-  { label: "Docs" },
-]);
-const jsonLd = toJsonLd(crumbs, { origin: "https://example.com" });
-```
+| Input | Result |
+| --- | --- |
+| Relative `href` without `origin` | `item` omitted (safe) |
+| Absolute `http(s)` `href` | Resolved without `origin` |
+| Relative `href` with `origin` | Resolved against that origin |
+| `BreadcrumbJsonLd` in the browser without `origin` | Uses `window.location.origin` |
 
 Subpath import:
 
@@ -98,14 +100,16 @@ import {
 } from "@ameshkin/nextcrumbs/utils/jsonld";
 ```
 
-## Styling and density
-
-Pass MUI Breadcrumbs props through `muiProps`:
+## Layout controls
 
 ```tsx
 <Breadcrumbs
   dense
-  muiProps={{ maxItems: 4, itemsBeforeCollapse: 1, itemsAfterCollapse: 1 }}
+  size="small"
+  truncate={140}
+  maxItems={4}
+  itemsBeforeCollapse={1}
+  itemsAfterCollapse={1}
   items={[
     { label: "Home", href: "/" },
     { label: "Docs", href: "/docs" },
@@ -115,9 +119,9 @@ Pass MUI Breadcrumbs props through `muiProps`:
 />
 ```
 
-## Testing (Vitest + RTL)
+Default root margin is `0`. Set spacing with `sx` when needed.
 
-Render the component directly. No router needed:
+## Testing (Vitest + RTL)
 
 ```tsx
 import { render, screen } from "@testing-library/react";
@@ -139,6 +143,6 @@ it("renders a non-link last crumb", () => {
 
 ## Tips
 
-* Prefer **page-level JSON-LD** next to the visual trail for static SEO.
-* Keep labels human-readable; reserve slugs for `href`.
-* External crumbs: set `external: true` on an item for `target="_blank"` + `rel="noopener noreferrer"`.
+* Keep labels human-readable. Put slugs in `href`.
+* External crumbs: set `external: true` for `target="_blank"` and `rel="noopener noreferrer"`.
+* Home icon applies only when `href === homeHref` (default `"/"`), not when the label happens to say "Home".

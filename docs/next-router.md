@@ -1,10 +1,10 @@
 # NextCrumbs • Next.js App Router
 
-Use `usePathBreadcrumbs` to derive breadcrumb items from `next/navigation` and render with `next/link`.
+Derive breadcrumb items from `next/navigation` and render with `next/link`.
 
 You do **not** need `react-router-dom` for this path.
 
-## Quick start (auto from URL)
+## Quick start (client)
 
 ```tsx
 "use client";
@@ -19,6 +19,23 @@ export default function AutoTrail() {
   return <Breadcrumbs LinkComponent={Link} items={items} />;
 }
 ```
+
+## Server Components (RSC-safe)
+
+Prefer the pure helper so you do not pull a client boundary:
+
+```tsx
+import Link from "next/link";
+import { Breadcrumbs } from "@ameshkin/nextcrumbs";
+import { buildPathBreadcrumbs } from "@ameshkin/nextcrumbs/utils/buildPathBreadcrumbs";
+
+export default function ServerTrail({ pathname }: { pathname: string }) {
+  const items = buildPathBreadcrumbs(pathname, { rootLabel: "Home" });
+  return <Breadcrumbs LinkComponent={Link} items={items} />;
+}
+```
+
+`usePathBreadcrumbs` is a thin client wrapper around the same helper.
 
 ## Customize labels, base, and excludes
 
@@ -64,7 +81,7 @@ export default function StaticTrail() {
 }
 ```
 
-## Custom separator and icons
+## Separator, icons, and SEO
 
 ```tsx
 "use client";
@@ -78,6 +95,7 @@ export default function StyledTrail() {
     <Breadcrumbs
       LinkComponent={Link}
       separatorIcon={<NavigateNextIcon fontSize="small" />}
+      jsonLdOrigin="https://yoursite.com"
       dense
       items={[
         { label: "Home", href: "/", icon: <HomeOutlinedIcon /> },
@@ -89,18 +107,9 @@ export default function StyledTrail() {
 }
 ```
 
-## `usePathBreadcrumbs(pathname, options?)`
+The automatic Home icon is applied only when `href === homeHref` (default `"/"`).
 
-```ts
-type PathCrumbOptions = {
-  baseHref?: string;
-  labelMap?: Record<string, string>;
-  exclude?: string[];
-  decode?: boolean;
-  rootLabel?: string;
-  transformLabel?: (segment: string) => string;
-};
-```
+## `usePathBreadcrumbs` / `buildPathBreadcrumbs` options
 
 | Option           | Type                          | Default       | Description                    |
 | ---------------- | ----------------------------- | ------------- | ------------------------------ |
@@ -111,20 +120,18 @@ type PathCrumbOptions = {
 | `rootLabel`      | `string`                      | `"Dashboard"` | Root crumb label               |
 | `transformLabel` | `(segment: string) => string` | -             | Custom formatter               |
 
-Subpath import (optional):
-
 ```ts
 import { usePathBreadcrumbs } from "@ameshkin/nextcrumbs/hooks/usePathBreadcrumbs";
+import { buildPathBreadcrumbs } from "@ameshkin/nextcrumbs/utils/buildPathBreadcrumbs";
 ```
 
-## Accessibility & SEO
+## Accessibility and SEO
 
-* Default `aria-label` is `"Breadcrumb"` (override with `ariaLabel`)
-* For JSON-LD, use `BreadcrumbJsonLd` / `breadcrumbsToJsonLd` from the main entry (see [vanilla-json.md](./vanilla-json.md))
+* Default `aria-label` is `"Breadcrumb"` (override with `ariaLabel`).
+* Current page receives `aria-current="page"`.
+* For JSON-LD, pass `jsonLdOrigin` or use `BreadcrumbJsonLd` / `breadcrumbsToJsonLd` (see [vanilla-json.md](./vanilla-json.md)).
 
-## Theming and collapse
-
-Use your app's `ThemeProvider`. Pass MUI props via `muiProps` when needed (including collapse for deep trails):
+## Collapse and density
 
 ```tsx
 "use client";
@@ -135,7 +142,11 @@ export default function DenseTrail() {
   return (
     <Breadcrumbs
       LinkComponent={Link}
-      muiProps={{ maxItems: 4, itemsBeforeCollapse: 1, itemsAfterCollapse: 1 }}
+      maxItems={4}
+      itemsBeforeCollapse={1}
+      itemsAfterCollapse={1}
+      size="small"
+      truncate={160}
       items={[
         { label: "Home", href: "/" },
         { label: "Catalog", href: "/catalog" },
@@ -148,20 +159,23 @@ export default function DenseTrail() {
 }
 ```
 
-Style slots: `sx`, `itemSx`, `linkSx`, `currentSx`, `contentSx`, `iconSx`, `labelSx`.
+Style slots: `sx`, `itemSx`, `linkSx`, `currentSx`, `contentSx`, `iconSx`, `labelSx`. Default root margin is `0`.
 
 ## Testing tip (Vitest + jsdom)
 
-Mock `next/link` to a simple anchor when rendering in jsdom:
+Mock `next/link` to a simple anchor:
 
 ```tsx
-// test/NextLinkMock.tsx
 import * as React from "react";
 
-export default function NextLinkMock(props: any) {
+export default function NextLinkMock(props: {
+  href: string | { pathname?: string };
+  children?: React.ReactNode;
+}) {
   const { href, children, ...rest } = props;
+  const resolved = typeof href === "string" ? href : href?.pathname;
   return (
-    <a href={typeof href === "string" ? href : href?.pathname} {...rest}>
+    <a href={resolved} {...rest}>
       {children}
     </a>
   );

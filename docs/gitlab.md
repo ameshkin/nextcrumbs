@@ -18,6 +18,8 @@ import {
   Breadcrumbs,
   NextCrumb, // alias of Breadcrumbs
   usePathBreadcrumbs,
+  buildPathBreadcrumbs,
+  getLinkRoutingProps,
   toJsonLd,
   BreadcrumbJsonLd,
   breadcrumbsToJsonLd,
@@ -30,8 +32,11 @@ import {
 // Component only
 import { Breadcrumbs } from "@ameshkin/nextcrumbs/breadcrumbs";
 
-// Next.js App Router hook
+// Next.js App Router hook (client)
 import { usePathBreadcrumbs } from "@ameshkin/nextcrumbs/hooks/usePathBreadcrumbs";
+
+// RSC-safe pure path helper (no "use client")
+import { buildPathBreadcrumbs } from "@ameshkin/nextcrumbs/utils/buildPathBreadcrumbs";
 
 // React Router hook (optional peer: react-router-dom)
 import {
@@ -40,7 +45,7 @@ import {
   type ReactRouterBreadcrumbsOptions,
 } from "@ameshkin/nextcrumbs/hooks/useReactRouterBreadcrumbs";
 
-// JSON-LD helpers
+// JSON-LD helpers (no "use client")
 import {
   toJsonLd,
   BreadcrumbJsonLd,

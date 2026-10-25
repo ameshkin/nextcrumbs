@@ -19,13 +19,13 @@ As of **0.2.1**, this hook is **not** re-exported from `@ameshkin/nextcrumbs` so
 ## Quick demo
 
 ```tsx
-import { MemoryRouter, Routes, Route } from "react-router-dom";
+import { MemoryRouter, Routes, Route, Link as RouterLink } from "react-router-dom";
 import { Breadcrumbs } from "@ameshkin/nextcrumbs";
 import { useReactRouterBreadcrumbs } from "@ameshkin/nextcrumbs/hooks/useReactRouterBreadcrumbs";
 
 function Trail() {
   const items = useReactRouterBreadcrumbs({ rootLabel: "Home" });
-  return <Breadcrumbs items={items} />;
+  return <Breadcrumbs LinkComponent={RouterLink} linkProp="to" items={items} />;
 }
 
 export default function Demo() {
