@@ -1,23 +1,54 @@
-.idea
-dist
+# Dependencies / build
 node_modules/
-.cursor
-.cursorrules
-.nvmrc
-.progress
-.vscode
-.orchestrator
+dist/
+*.tgz
+ameshkin-nextcrumbs-*.tgz
 
-# Environment files
+# Env / secrets (never commit)
 .env
-.env.local
-.env.development.local
-.env.production.local
-.env.production
-
-# NPM
+.env.*
+!.env.example
+!.env.production.example
 .npmrc
 
-# Local secrets (never publish)
-.env.development
-.env.production
+# Logs / coverage / caches
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+coverage/
+.nyc_output/
+.cache/
+.turbo/
+*.tsbuildinfo
+
+# Test / e2e artifacts
+test-results/
+playwright-report/
+blob-report/
+.playwright/
+.vitest/
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Local / private tooling (not part of the published package)
+.cursor/
+.cursorrules
+.docs/
+.nvmrc
+.progress/
+.orchestrator/
+.orchestrator/**
+
+# Optional local config
+jira-mate.json
+bugs.json
+orchestrator.json
