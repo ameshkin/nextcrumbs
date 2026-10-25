@@ -394,54 +394,62 @@ This package peers **`@mui/material@^7`**. Do not run `npm audit fix --force` to
 
 ## FAQ
 
-### Do I need Next.js?
+> **Note.** NextCrumbs does **not** require Next.js. It is a React + MUI component that runs in **Vite**, CRA, Remix, and other React apps. The name comes from the original Next.js target. Next.js is optional. Use the answers below by topic.
 
-No. NextCrumbs is a React + MUI component. It works in **Vite**, CRA, Remix, and other React setups. Next.js is optional. The name reflects the original Next.js target, not a hard dependency.
+### Framework and bundler
 
-### Does it work with Vite?
+**Do I need Next.js?**
 
-Yes. Install the package and MUI peers, then render `<Breadcrumbs items={...} />`. For SPAs, pair with React Router and `linkProp="to"` (see [Quick Start (Vite / any React)](#quick-start-vite--any-react)). There is no Vite-specific plugin.
+No. Install the package and MUI peers, then render `<Breadcrumbs />`. No Next.js plugins or `"use client"` directives are required outside the App Router.
 
-### Does it work with React Router?
+**Does it work with Vite?**
 
-Yes. Import the hook from the React Router subpath, and pass `LinkComponent={RouterLink}` with **`linkProp="to"`**.
+Yes. There is no Vite-specific plugin. See [Quick Start (Vite / any React)](#quick-start-vite--any-react) and [`docs/vanilla-json.md`](./docs/vanilla-json.md).
+
+---
+
+### Routing
+
+**Does it work with React Router?**
+
+Yes. Import the hook from the React Router subpath and pass `LinkComponent={RouterLink}` with `linkProp="to"`:
 
 ```ts
 import { useReactRouterBreadcrumbs } from "@ameshkin/nextcrumbs/hooks/useReactRouterBreadcrumbs";
 // <Breadcrumbs LinkComponent={RouterLink} linkProp="to" items={items} />
 ```
 
-`linkProp="to"` adds React Router's `to` **and** keeps a native `href`, so right-click "Open in new tab" still works. `react-router-dom` is optional. Install it only when you use that subpath.
+`linkProp="to"` sets React Router's `to` and still keeps a native `href` (right-click open / middle-click). Install `react-router-dom` only when you use that subpath.
 
-### Can I emit JSON-LD from `<Breadcrumbs>`?
+**Do I need `react-router-dom` for Next.js?**
 
-Yes. Pass `jsonLdOrigin` (your site origin). Relative crumb hrefs resolve against it:
+No. Use the main entry and `usePathBreadcrumbs`. Only install React Router if you import `@ameshkin/nextcrumbs/hooks/useReactRouterBreadcrumbs`. If a bundler errors on that subpath, see [Troubleshooting](#troubleshooting).
+
+---
+
+### Appearance and SEO
+
+**How do I style the current (last) crumb?**
+
+Omit `href` on the last item so it renders as text. Style it with `currentSx` or your theme.
+
+**Can I disable icons?**
+
+Yes. Do not pass `icon` on items. The automatic Home icon only appears when `href === homeHref` (default `"/"`). Change `homeHref` or pass your own `icon` if you want different behavior.
+
+**Can I emit JSON-LD from `<Breadcrumbs>`?**
+
+Yes. Pass `jsonLdOrigin` (your real site origin):
 
 ```tsx
-<Breadcrumbs items={items} jsonLdOrigin="https://yoursite.com" LinkComponent={Link} />
+<Breadcrumbs items={items} jsonLdOrigin="https://yoursite.com" />
 ```
 
-### Do I need `react-router-dom` for Next.js?
+---
 
-No. Use the main entry and `usePathBreadcrumbs`:
+### Versions and peers
 
-```ts
-import { Breadcrumbs, usePathBreadcrumbs } from "@ameshkin/nextcrumbs";
-```
-
-### How do I style the current (last) crumb?
-
-Omit `href` on the last item so it renders as text. Then use `currentSx` or your theme.
-
-### Can I disable icons?
-
-Yes. Do not pass `icon` on items. The automatic Home icon only applies when a crumb's `href` equals `homeHref` (default `"/"`). Override `homeHref` or pass a custom `icon` / omit the root href if you want no icon.
-
-### Why is MUI capped at `^7`?
-
-A wider peer like `>=7` lets npm pull MUI 8 or 9. That breaks apps still on MUI 7 (for example `@mui/x-charts@7`). Keep NextCrumbs on `^7` for 0.2.x.
-
-### Which version should I install?
+**Which version should I install?**
 
 Use **0.2.1+**. Do not use **0.2.0** (broken `exports` pointing at missing `./public/*`).
 
@@ -449,13 +457,19 @@ Use **0.2.1+**. Do not use **0.2.0** (broken `exports` pointing at missing `./pu
 npm i @ameshkin/nextcrumbs@^0.2.1
 ```
 
-### Where are the deep guides?
+**Why is MUI capped at `^7`?**
+
+A wider peer like `>=7` lets npm pull MUI 8 or 9, which breaks apps still on MUI 7. Keep NextCrumbs on `^7` for 0.2.x.
+
+---
+
+### More guides
 
 | Topic | Doc |
 | --- | --- |
 | Vite / no Next.js / JSON-LD | [`docs/vanilla-json.md`](./docs/vanilla-json.md) |
 | React Router | [`docs/react-router.md`](./docs/react-router.md) |
-| Next.js App Router | [`docs/next-router.md`](./docs/next-router.md) |
+| Next.js App Router (optional) | [`docs/next-router.md`](./docs/next-router.md) |
 | Subpath exports | [`docs/gitlab.md`](./docs/gitlab.md) |
 | Changelog | [`docs/changes.md`](./docs/changes.md) |
 
