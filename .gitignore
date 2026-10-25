@@ -52,3 +52,7 @@ Thumbs.db
 jira-mate.json
 bugs.json
 orchestrator.json
+
+# Internal audit notes (never commit or publish)
+docs/bug-hunt*.md
+**/bug-hunt-report*.md

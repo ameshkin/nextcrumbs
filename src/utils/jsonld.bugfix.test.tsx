@@ -1,5 +1,5 @@
 /**
- * Tests to verify bug fixes from bug hunt
+ * Regression tests for JSON-LD helpers
  * Tests BUG-023, BUG-027
  */
 

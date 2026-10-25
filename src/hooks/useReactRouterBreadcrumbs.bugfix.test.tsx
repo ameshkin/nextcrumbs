@@ -1,5 +1,5 @@
 /**
- * Tests to verify bug fixes from bug hunt
+ * Regression tests for useReactRouterBreadcrumbs
  * Tests BUG-025, BUG-030
  */
 

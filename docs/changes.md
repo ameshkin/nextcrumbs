@@ -1,17 +1,15 @@
 ## Docs & API Changes
 
-### Bug hunt fixes + features (still 0.2.1, unpublished)
+### 0.2.1 polish (pre-publish)
 
-- **BH-01 / `linkProp`:** `linkProp="href" | "to"` so React Router `Link` works without an adapter. When `"to"`, native `href` is still set (right-click / open in new tab / middle-click).
-- **BH-02:** Default root margin is `mb: 0` (set margin via `sx`).
-- **BH-03:** Home icon is `href === homeHref` only (not label match). New `homeHref` prop.
-- **BH-04:** React Router at `/` returns `{ label }` with no self-link `href`.
-- **BH-05:** JSON-LD no longer defaults to `https://example.com`. Relative URLs need `origin`; `BreadcrumbJsonLd` falls back to `window.location.origin` in the browser.
-- **BH-06:** Crumb content renderer hoisted outside render.
-- **BH-07:** `"use client"` is not stamped on `utils/jsonld` or `utils/buildPathBreadcrumbs`.
-- **New:** `maxItems` / collapse props, `size`, `truncate`, `jsonLdOrigin` on `<Breadcrumbs>`.
-- **New:** RSC-safe `buildPathBreadcrumbs` (+ subpath export).
-- **New:** `.github/workflows/publish.yml` for npm Trusted Publishing (OIDC).
+- **`linkProp`:** `"href" | "to"` for Next.js vs React Router. When `"to"`, native `href` is still set so right-click / open in new tab / middle-click work.
+- **Layout:** Default root margin is `mb: 0` (set margin via `sx`).
+- **Home icon:** Only when `href === homeHref` (default `"/"`), not by label match.
+- **React Router root:** At `/`, returns a current crumb with no self-link `href`.
+- **JSON-LD:** No `example.com` default. Pass `origin`, or let `BreadcrumbJsonLd` use `window.location.origin` in the browser. Optional `jsonLdOrigin` on `<Breadcrumbs>`.
+- **Build:** `"use client"` is not stamped on `utils/jsonld` or `utils/buildPathBreadcrumbs`.
+- **API:** `maxItems` / collapse, `size`, `truncate`, RSC-safe `buildPathBreadcrumbs`.
+- **Publish:** `.github/workflows/publish.yml` for npm Trusted Publishing (OIDC).
 
 ### Documentation refresh (0.2.1)
 

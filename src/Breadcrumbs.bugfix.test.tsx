@@ -1,5 +1,5 @@
 /**
- * Tests to verify bug fixes from bug hunt
+ * Regression tests for Breadcrumbs edge cases
  * Tests BUG-024, BUG-026
  */
 
