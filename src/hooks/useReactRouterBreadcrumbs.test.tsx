@@ -67,7 +67,7 @@ describe("useReactRouterBreadcrumbs (hook-only)", () => {
   })
 
   it("works with useRRBreadcrumbs alias", async () => {
-    const { useRRBreadcrumbs } = await import("../index.js")
+    const { useRRBreadcrumbs } = await import("./useReactRouterBreadcrumbs.js")
     function EchoRRItems() {
       const items = useRRBreadcrumbs({ rootLabel: "Home" })
       return <div data-testid="rr-json">{JSON.stringify(items)}</div>

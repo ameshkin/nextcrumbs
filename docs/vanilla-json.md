@@ -2,6 +2,8 @@
 
 Use `<Breadcrumbs>` without any router, or add page-level JSON-LD for static SEO.
 
+Requires MUI + Emotion peers. Does **not** require Next.js or React Router.
+
 ## Manual items (no router)
 
 ```tsx
@@ -18,73 +20,91 @@ export default function ManualTrail() {
     />
   );
 }
-````
-
-* Omit `LinkComponent` to render standard anchors for items with `href`.
-* The last item should generally have no `href` (current page).
-
-## JSON-LD at the page level
-
-Add static structured data with a `<script type="application/ld+json">` tag. This is independent of the visual breadcrumbs component.
-
-```tsx
-import * as React from "react";
-
-type Crumb = { name: string; href?: string };
-
-function toJsonLd(crumbs: Crumb[], origin = "https://example.com") {
-  return {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: crumbs.map((c, i) => ({
-      "@type": "ListItem",
-      position: i + 1,
-      name: c.name,
-      ...(c.href ? { item: new URL(c.href, origin).toString() } : {})
-    }))
-  };
-}
-
-export function BreadcrumbJsonLd({ crumbs, origin }: { crumbs: Crumb[]; origin?: string }) {
-  const json = React.useMemo(() => toJsonLd(crumbs, origin), [crumbs, origin]);
-  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(json) }} />;
-}
 ```
 
-Usage:
+* Omit `LinkComponent` to use the default MUI link for items with `href`.
+* The last item should generally have no `href` (current page).
+
+## JSON-LD with built-in helpers
+
+Prefer the package helpers instead of hand-rolling schema.org markup:
 
 ```tsx
-import { Breadcrumbs } from "@ameshkin/nextcrumbs";
-import { BreadcrumbJsonLd } from "./BreadcrumbJsonLd";
+import {
+  Breadcrumbs,
+  BreadcrumbJsonLd,
+  breadcrumbsToJsonLd,
+} from "@ameshkin/nextcrumbs";
 
 export default function DocsPage() {
-  const crumbs = [
-    { name: "Home", href: "/" },
-    { name: "Docs", href: "/docs" },
-    { name: "API" }
+  const items = [
+    { label: "Home", href: "/" },
+    { label: "Docs", href: "/docs" },
+    { label: "API" },
   ];
 
   return (
     <>
-      <BreadcrumbJsonLd crumbs={crumbs} origin="https://example.com" />
-      <Breadcrumbs
-        items={[
-          { label: "Home", href: "/" },
-          { label: "Docs", href: "/docs" },
-          { label: "API" }
-        ]}
+      <BreadcrumbJsonLd
+        crumbs={breadcrumbsToJsonLd(items)}
+        origin="https://example.com"
       />
+      <Breadcrumbs items={items} />
     </>
   );
 }
 ```
 
+### `toJsonLd`
+
+Build the object yourself (for custom script injection or server rendering):
+
+```tsx
+import { toJsonLd } from "@ameshkin/nextcrumbs";
+
+const jsonLd = toJsonLd(
+  [
+    { name: "Home", href: "/" },
+    { name: "Docs", href: "/docs" },
+    { name: "API" },
+  ],
+  { origin: "https://example.com" }
+);
+
+// <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+```
+
+### `breadcrumbsToJsonLd`
+
+Maps `{ label, href? }` visual items into `{ name, href? }` JSON-LD crumbs:
+
+```ts
+import { breadcrumbsToJsonLd, toJsonLd } from "@ameshkin/nextcrumbs";
+
+const crumbs = breadcrumbsToJsonLd([
+  { label: "Home", href: "/" },
+  { label: "Docs" },
+]);
+const jsonLd = toJsonLd(crumbs, { origin: "https://example.com" });
+```
+
+Subpath import:
+
+```ts
+import {
+  toJsonLd,
+  BreadcrumbJsonLd,
+  breadcrumbsToJsonLd,
+} from "@ameshkin/nextcrumbs/utils/jsonld";
+```
+
 ## Styling and density
 
-Pass any MUI Breadcrumbs props through `muiProps`:
+Pass MUI Breadcrumbs props through `muiProps`:
 
 ```tsx
 <Breadcrumbs
+  dense
   muiProps={{ maxItems: 4, itemsBeforeCollapse: 1, itemsAfterCollapse: 1 }}
   items={[
     { label: "Home", href: "/" },
@@ -97,7 +117,7 @@ Pass any MUI Breadcrumbs props through `muiProps`:
 
 ## Testing (Vitest + RTL)
 
-Render the component directly—no router needed:
+Render the component directly. No router needed:
 
 ```tsx
 import { render, screen } from "@testing-library/react";
@@ -119,5 +139,6 @@ it("renders a non-link last crumb", () => {
 
 ## Tips
 
-* Prefer **page-level JSON-LD** for static SEO markup (see example above).
+* Prefer **page-level JSON-LD** next to the visual trail for static SEO.
 * Keep labels human-readable; reserve slugs for `href`.
+* External crumbs: set `external: true` on an item for `target="_blank"` + `rel="noopener noreferrer"`.

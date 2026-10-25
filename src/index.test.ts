@@ -1,5 +1,6 @@
 /**
- * Test that all exports are available and correctly typed
+ * Test that main-entry exports are available and correctly typed.
+ * React Router hooks are intentionally NOT on the main entry (optional peer).
  */
 
 import { describe, it, expect } from "vitest";
@@ -7,8 +8,6 @@ import {
   NextCrumb,
   Breadcrumbs,
   usePathBreadcrumbs,
-  useReactRouterBreadcrumbs,
-  useRRBreadcrumbs,
   toJsonLd,
   BreadcrumbJsonLd,
   breadcrumbsToJsonLd,
@@ -16,7 +15,6 @@ import {
   type BreadcrumbItem,
   type PathCrumbOptions,
   type PathBreadcrumb,
-  type ReactRouterBreadcrumbsOptions,
   type JsonLdBreadcrumb,
   type JsonLdOptions,
 } from "./index";
@@ -41,18 +39,10 @@ describe("index exports", () => {
     expect(typeof usePathBreadcrumbs).toBe("function");
   });
 
-  it("exports useReactRouterBreadcrumbs hook", () => {
-    expect(useReactRouterBreadcrumbs).toBeDefined();
-    expect(typeof useReactRouterBreadcrumbs).toBe("function");
-  });
-
-  it("exports useRRBreadcrumbs alias", () => {
-    expect(useRRBreadcrumbs).toBeDefined();
-    expect(typeof useRRBreadcrumbs).toBe("function");
-  });
-
-  it("useRRBreadcrumbs and useReactRouterBreadcrumbs are the same", () => {
-    expect(useRRBreadcrumbs).toBe(useReactRouterBreadcrumbs);
+  it("does not export React Router hooks from the main entry", async () => {
+    const mod = await import("./index.js");
+    expect(mod).not.toHaveProperty("useReactRouterBreadcrumbs");
+    expect(mod).not.toHaveProperty("useRRBreadcrumbs");
   });
 
   it("exports toJsonLd function", () => {
@@ -71,17 +61,14 @@ describe("index exports", () => {
   });
 
   it("exports all type definitions", () => {
-    // Type-only exports, just verify they're importable
     const _types: {
       BreadcrumbsProps: BreadcrumbsProps;
       BreadcrumbItem: BreadcrumbItem;
       PathCrumbOptions: PathCrumbOptions;
       PathBreadcrumb: PathBreadcrumb;
-      ReactRouterBreadcrumbsOptions: ReactRouterBreadcrumbsOptions;
       JsonLdBreadcrumb: JsonLdBreadcrumb;
       JsonLdOptions: JsonLdOptions;
     } = {} as any;
     expect(_types).toBeDefined();
   });
 });
-

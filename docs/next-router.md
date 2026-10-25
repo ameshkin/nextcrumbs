@@ -1,6 +1,8 @@
 # NextCrumbs • Next.js App Router
 
-Use `usePathBreadcrumbs` to derive breadcrumb items from `next/navigation` and render with your `next/link`.
+Use `usePathBreadcrumbs` to derive breadcrumb items from `next/navigation` and render with `next/link`.
+
+You do **not** need `react-router-dom` for this path.
 
 ## Quick start (auto from URL)
 
@@ -30,9 +32,11 @@ export default function CustomTrail() {
   const pathname = usePathname();
   const items = usePathBreadcrumbs(pathname, {
     baseHref: "/",
+    rootLabel: "Home",
     labelMap: { sku: "SKU", new: "Create" },
     exclude: ["_private"],
-    decode: true
+    decode: true,
+    transformLabel: (seg) => seg.replace(/-/g, " "),
   });
 
   return <Breadcrumbs LinkComponent={Link} items={items} />;
@@ -74,6 +78,7 @@ export default function StyledTrail() {
     <Breadcrumbs
       LinkComponent={Link}
       separatorIcon={<NavigateNextIcon fontSize="small" />}
+      dense
       items={[
         { label: "Home", href: "/", icon: <HomeOutlinedIcon /> },
         { label: "Products", href: "/products" },
@@ -87,29 +92,39 @@ export default function StyledTrail() {
 ## `usePathBreadcrumbs(pathname, options?)`
 
 ```ts
-type PathOptions = {
-  baseHref?: string
-  labelMap?: Record<string, string>
-  exclude?: string[]
-  decode?: boolean
-}
+type PathCrumbOptions = {
+  baseHref?: string;
+  labelMap?: Record<string, string>;
+  exclude?: string[];
+  decode?: boolean;
+  rootLabel?: string;
+  transformLabel?: (segment: string) => string;
+};
 ```
 
-| Option     | Type                    | Default | Description                          |
-| ---------- | ----------------------- | ------- | ------------------------------------ |
-| `baseHref` | `string`                | `"/"`   | Root href for the first crumb        |
-| `labelMap` | `Record<string,string>` | `{}`    | Override labels by URL segment       |
-| `exclude`  | `string[]`              | `[]`    | Skip specific segments               |
-| `decode`   | `boolean`               | `true`  | Apply `decodeURIComponent` to labels |
+| Option           | Type                          | Default       | Description                    |
+| ---------------- | ----------------------------- | ------------- | ------------------------------ |
+| `baseHref`       | `string`                      | `"/"`         | Root href for the first crumb  |
+| `labelMap`       | `Record<string,string>`       | `{}`          | Override labels by URL segment |
+| `exclude`        | `string[]`                    | `[]`          | Skip specific segments         |
+| `decode`         | `boolean`                     | `true`        | `decodeURIComponent` on labels |
+| `rootLabel`      | `string`                      | `"Dashboard"` | Root crumb label               |
+| `transformLabel` | `(segment: string) => string` | -             | Custom formatter               |
+
+Subpath import (optional):
+
+```ts
+import { usePathBreadcrumbs } from "@ameshkin/nextcrumbs/hooks/usePathBreadcrumbs";
+```
 
 ## Accessibility & SEO
 
-* `<Breadcrumbs aria-label="breadcrumbs">` for screen readers
-* For JSON-LD, add page-level `<script type="application/ld+json">` in your layout if you prefer static SEO markup (see [`docs/vanilla-json.md`](./vanilla-json.md))
+* Default `aria-label` is `"Breadcrumb"` (override with `ariaLabel`)
+* For JSON-LD, use `BreadcrumbJsonLd` / `breadcrumbsToJsonLd` from the main entry (see [vanilla-json.md](./vanilla-json.md))
 
-## Theming
+## Theming and collapse
 
-Use your app’s `ThemeProvider`. Pass MUI props via `muiProps` when needed:
+Use your app's `ThemeProvider`. Pass MUI props via `muiProps` when needed (including collapse for deep trails):
 
 ```tsx
 "use client";
@@ -133,6 +148,8 @@ export default function DenseTrail() {
 }
 ```
 
+Style slots: `sx`, `itemSx`, `linkSx`, `currentSx`, `contentSx`, `iconSx`, `labelSx`.
+
 ## Testing tip (Vitest + jsdom)
 
 Mock `next/link` to a simple anchor when rendering in jsdom:
@@ -143,12 +160,15 @@ import * as React from "react";
 
 export default function NextLinkMock(props: any) {
   const { href, children, ...rest } = props;
-  return <a href={typeof href === "string" ? href : href?.pathname} {...rest}>{children}</a>;
+  return (
+    <a href={typeof href === "string" ? href : href?.pathname} {...rest}>
+      {children}
+    </a>
+  );
 }
 ```
 
 ```tsx
-// Breadcrumbs.test.tsx
 import { render, screen } from "@testing-library/react";
 import Link from "../test/NextLinkMock";
 import { Breadcrumbs } from "@ameshkin/nextcrumbs";

@@ -1,37 +1,35 @@
 {
   "name": "@ameshkin/nextcrumbs",
-  "version": "0.2.0",
-  "description": "MUI 7 breadcrumbs with Next.js Link support, optional URL auto-generation, and SEO microdata.",
+  "version": "0.2.1",
+  "description": "MUI breadcrumbs with Next.js Link support, optional URL auto-generation, and SEO microdata.",
   "license": "MIT",
   "type": "module",
-  "workspaces": [
-    "packages/*"
-  ],
   "author": "Amir Meshkin <amir.meshkin@gmail.com> (https://github.com/ameshkin)",
-  "main": "./public/index.js",
-  "module": "./public/index.js",
-  "types": "./public/index.d.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./public/index.d.ts",
-      "import": "./public/index.js",
-      "default": "./public/index.js"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
     },
+    "./package.json": "./package.json",
     "./breadcrumbs": {
-      "types": "./public/Breadcrumbs.d.ts",
-      "import": "./public/Breadcrumbs.js"
+      "types": "./dist/Breadcrumbs.d.ts",
+      "import": "./dist/Breadcrumbs.js"
     },
     "./hooks/usePathBreadcrumbs": {
-      "types": "./public/hooks/usePathBreadcrumbs.d.ts",
-      "import": "./public/hooks/usePathBreadcrumbs.js"
+      "types": "./dist/hooks/usePathBreadcrumbs.d.ts",
+      "import": "./dist/hooks/usePathBreadcrumbs.js"
     },
     "./hooks/useReactRouterBreadcrumbs": {
-      "types": "./public/hooks/useReactRouterBreadcrumbs.d.ts",
-      "import": "./public/hooks/useReactRouterBreadcrumbs.js"
+      "types": "./dist/hooks/useReactRouterBreadcrumbs.d.ts",
+      "import": "./dist/hooks/useReactRouterBreadcrumbs.js"
     },
     "./utils/jsonld": {
-      "types": "./public/utils/jsonld.d.ts",
-      "import": "./public/utils/jsonld.js"
+      "types": "./dist/utils/jsonld.d.ts",
+      "import": "./dist/utils/jsonld.js"
     }
   },
   "files": [
@@ -48,46 +46,40 @@
     "test:e2e:ui": "playwright test",
     "test:e2e:bdd": "cucumber-js \"tests/e2e/features/**/*.feature\" --require \"tests/e2e/steps/**/*.mjs\"",
     "typecheck": "tsc -p tsconfig.build.json --noEmit",
-    "prepublishOnly": "npm run typecheck && npm run test:run && npm run build",
-    "publish:all": "npm run typecheck && npm run test:run && npm run build && npm version patch -m \"chore(release): %s\" && git push --follow-tags && npm publish && npm publish --access public --registry https://registry.npmjs.org/",
-    "orchestrator:ci": "ts-node ./scripts/orchestrator-ci.ts",
-    "clean-build": "bash ./scripts/orchestrator-clean-build.sh",
-    "orchestrator:clean-build": "bash ./scripts/orchestrator-clean-build.sh",
-    "jira:projects": "node scripts/jira-projects.js"
+    "ci": "npm run typecheck && npm run test:run && npm run build",
+    "prepublishOnly": "npm run ci",
+    "publish:all": "npm run ci && npm version patch -m \"chore(release): %s\" && git push --follow-tags && npm publish --access public --registry https://registry.npmjs.org/"
   },
   "peerDependencies": {
-    "@emotion/react": ">=11",
-    "@emotion/styled": ">=11",
-    "@mui/icons-material": ">=7",
-    "@mui/material": ">=7",
+    "@emotion/react": "^11.0.0",
+    "@emotion/styled": "^11.0.0",
+    "@mui/icons-material": "^7.0.0",
+    "@mui/material": "^7.0.0",
     "react": ">=18",
     "react-dom": ">=18",
-    "react-router-dom": ">=6 || >=7"
+    "react-router-dom": ">=6"
   },
   "peerDependenciesMeta": {
-    "@emotion/react": {
-      "optional": false
-    },
-    "@emotion/styled": {
-      "optional": false
-    },
     "react-router-dom": {
       "optional": true
     }
   },
   "devDependencies": {
-    "@ameshkin/jira-mate": "^0.1.17",
-    "@cucumber/cucumber": "^11.2.0",
-    "@playwright/test": "^1.57.0",
-    "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.0",
-    "jsdom": "^22.1.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-router-dom": "^7.9.6",
-    "tsup": "^8.5.0",
-    "typescript": "^5.9.3",
-    "vitest": "^4.0.6"
+    "@cucumber/cucumber": "^13.3.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "^7.3.11",
+    "@mui/material": "^7.3.11",
+    "@playwright/test": "^1.64.1",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "jsdom": "^28.1.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-router-dom": "^7.18.4",
+    "tsup": "^9.0.0",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.5"
   },
   "repository": {
     "type": "git",
@@ -104,7 +96,7 @@
   "engines": {
     "node": ">=20.19 <21 || >=22.12"
   },
-  "packageManager": "npm@10.5.0",
+  "packageManager": "npm@12.2.1",
   "keywords": [
     "mui",
     "breadcrumbs",

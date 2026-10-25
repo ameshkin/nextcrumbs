@@ -17,3 +17,7 @@ node_modules/
 
 # NPM
 .npmrc
+
+# Local secrets (never publish)
+.env.development
+.env.production

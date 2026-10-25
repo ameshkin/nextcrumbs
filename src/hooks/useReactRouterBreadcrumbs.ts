@@ -16,7 +16,8 @@
  * @example
  * ```tsx
  * import { BrowserRouter } from "react-router-dom";
- * import { Breadcrumbs, useReactRouterBreadcrumbs } from "@ameshkin/nextcrumbs";
+ * import { Breadcrumbs } from "@ameshkin/nextcrumbs";
+ * import { useReactRouterBreadcrumbs } from "@ameshkin/nextcrumbs/hooks/useReactRouterBreadcrumbs";
  *
  * function Trail() {
  *   const items = useReactRouterBreadcrumbs({
@@ -29,73 +30,13 @@
  * ```
  *
  * @remarks
- * Requires `react-router-dom` to be installed as an optional peer dependency.
- * The hook uses lazy loading, so it won't cause issues if react-router-dom isn't installed
- * unless you actually call this hook.
+ * Requires `react-router-dom` as an optional peer dependency.
+ * Import only from this subpath so the main `@ameshkin/nextcrumbs` entry
+ * stays free of React Router for Next.js apps.
  */
 import * as React from "react"
 import type { ReactNode } from "react"
-
-// Lazy import pattern to avoid requiring react-router-dom when not used
-// We use a function that accesses the module at runtime to avoid
-// webpack trying to resolve it at build time when it's not installed
-let useLocationHook: (() => { pathname: string }) | null = null
-
-function getUseLocation(): () => { pathname: string } {
-  if (useLocationHook) return useLocationHook
-  
-  // Access react-router-dom dynamically using a pattern that's harder
-  // for webpack to statically analyze. We construct the module name
-  // in a way that makes it less obvious to static analysis.
-  try {
-    // BUG-030: Check for SSR environment and provide clearer error
-    if (typeof window === "undefined") {
-      throw new Error("useReactRouterBreadcrumbs cannot be used in SSR without react-router-dom")
-    }
-    
-    // Split the module name to make it harder for webpack to detect
-    const parts = ["react", "router", "dom"]
-    const mod = parts.join("-")
-    
-    // Try to access the module - this will work if it's available
-    // @ts-ignore - accessing optional dependency dynamically
-    let routerModule: any = null
-    
-    // Try CommonJS require (for Node.js/CommonJS environments)
-    if (typeof require !== 'undefined') {
-      try {
-        routerModule = require(mod)
-      } catch {
-        // require failed, module not available
-      }
-    }
-    
-    // For ESM environments, the module should be available through
-    // normal module resolution if installed. Since we can't use
-    // dynamic import() synchronously, we rely on the consuming
-    // project to have it available or configure webpack appropriately.
-    if (!routerModule) {
-      throw new Error("react-router-dom not available")
-    }
-    
-    if (!routerModule.useLocation || typeof routerModule.useLocation !== 'function') {
-      throw new Error("useLocation not found in react-router-dom")
-    }
-    
-    const hook = routerModule.useLocation
-    useLocationHook = hook
-    return hook
-  } catch (err: any) {
-    // BUG-030: If react-router-dom is not available, throw a helpful error with SSR context
-    const isSSR = typeof window === "undefined"
-    const baseMsg = "useReactRouterBreadcrumbs requires 'react-router-dom' to be installed. " +
-      "Please install it: npm install react-router-dom."
-    const ssrMsg = isSSR 
-      ? " Note: This hook cannot be used during SSR. Use it only in client components."
-      : ""
-    throw new Error(baseMsg + ssrMsg)
-  }
-}
+import { useLocation } from "react-router-dom"
 
 /**
  * Breadcrumb item type compatible with the Breadcrumbs component.
@@ -130,8 +71,6 @@ export type ReactRouterBreadcrumbsOptions = {
 }
 
 export function useReactRouterBreadcrumbs(options?: ReactRouterBreadcrumbsOptions): BreadcrumbItem[] {
-  const useLocation = getUseLocation()
-  // BUG-025: Improve type safety - properly type the location object
   const loc = useLocation() as { pathname?: string } | null | undefined
   const pathname: string = typeof loc?.pathname === "string" ? loc.pathname : "/"
   const { rootLabel, basePath, decode = true, exclude = [], mapSegmentLabel } = options || {}
@@ -140,7 +79,6 @@ export function useReactRouterBreadcrumbs(options?: ReactRouterBreadcrumbsOption
     let path = pathname || "/"
     if (basePath && path.startsWith(basePath)) path = path.slice(basePath.length) || "/"
     if (!path.startsWith("/")) path = `/${path}`
-    // BUG-029: Fix code style - add space after comma
     const raw = path === "/" ? [] : path.replace(/\/+$/, "").split("/").filter(Boolean)
 
     const isExcluded = (seg: string) =>
@@ -155,26 +93,25 @@ export function useReactRouterBreadcrumbs(options?: ReactRouterBreadcrumbsOption
       })
 
     const format = (seg: string) => {
-      let s: string;
+      let s: string
       if (decode) {
         try {
-          s = decodeURIComponent(seg);
+          s = decodeURIComponent(seg)
         } catch {
           // If decoding fails (malformed URI), use original segment
-          s = seg;
+          s = seg
         }
       } else {
-        s = seg;
+        s = seg
       }
-      return s.replace(/[-_]+/g, " ").replace(/\b\w/g, c => c.toUpperCase())
+      return s.replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
     }
 
-    const segments = raw.filter(s => !isExcluded(s))
+    const segments = raw.filter((s) => !isExcluded(s))
     const items: BreadcrumbItem[] = []
 
     if (rootLabel) items.push({ label: rootLabel, href: "/" })
 
-    // BUG-029: Fix code style - add space after comma
     let acc = basePath && basePath !== "/" ? basePath.replace(/\/+$/, "") : ""
     segments.forEach((seg, i) => {
       acc += `/${seg}`
@@ -198,5 +135,8 @@ export function useReactRouterBreadcrumbs(options?: ReactRouterBreadcrumbsOption
     return items
   }, [pathname, rootLabel, basePath, decode, exclude, mapSegmentLabel])
 }
+
+/** Alias for `useReactRouterBreadcrumbs`. */
+export const useRRBreadcrumbs = useReactRouterBreadcrumbs
 
 export default useReactRouterBreadcrumbs
