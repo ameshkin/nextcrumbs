@@ -2,6 +2,7 @@
 export { default as NextCrumb } from "./Breadcrumbs"
 // Alias for backward compatibility
 export { default as Breadcrumbs } from "./Breadcrumbs"
+export { getLinkRoutingProps } from "./Breadcrumbs"
 export type {
   BreadcrumbsProps,
   BreadcrumbItem,

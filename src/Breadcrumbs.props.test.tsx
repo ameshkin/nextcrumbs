@@ -205,23 +205,42 @@ describe("Breadcrumbs props and edge cases", () => {
     expect(screen.getAllByText("Home").length).toBeGreaterThan(0);
   });
 
-  it("passes to instead of href when linkProp is to", () => {
-    const ToLink = React.forwardRef<HTMLAnchorElement, { to?: string; children?: React.ReactNode }>(
-      function ToLink({ to, children }, ref) {
-        return (
-          <a href={to} ref={ref} data-testid="rr-link">
-            {children}
-          </a>
-        );
-      }
-    );
+  it("passes to and a native href when linkProp is to (right-click / open in new tab)", () => {
+    const received: Array<{ to?: string; href?: string }> = [];
+    const ToLink = React.forwardRef<
+      HTMLAnchorElement,
+      { to?: string; href?: string; children?: React.ReactNode }
+    >(function ToLink({ to, href, children }, ref) {
+      received.push({ to, href });
+      // Prefer native href so context-menu "Open in new tab" always has a URL.
+      return (
+        <a href={href ?? to} ref={ref} data-testid="rr-link">
+          {children}
+        </a>
+      );
+    });
     const items = [
       { label: "Home", href: "/" },
       { label: "Docs", href: "/docs" },
       { label: "API" },
     ];
     render(<Breadcrumbs items={items} LinkComponent={ToLink} linkProp="to" />);
-    const links = screen.getAllByTestId("rr-link");
+    const links = screen.getAllByRole("link");
+    expect(links).toHaveLength(2);
+    expect(links[0]).toHaveAttribute("href", "/");
+    expect(links[1]).toHaveAttribute("href", "/docs");
+    expect(received[0]).toEqual({ to: "/", href: "/" });
+    expect(received[1]).toEqual({ to: "/docs", href: "/docs" });
+  });
+
+  it("keeps native href when linkProp is href", () => {
+    const items = [
+      { label: "Home", href: "/" },
+      { label: "Docs", href: "/docs" },
+      { label: "API" },
+    ];
+    render(<Breadcrumbs items={items} LinkComponent={TestLink} linkProp="href" />);
+    const links = screen.getAllByRole("link");
     expect(links[0]).toHaveAttribute("href", "/");
     expect(links[1]).toHaveAttribute("href", "/docs");
   });

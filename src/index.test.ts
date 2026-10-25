@@ -9,6 +9,7 @@ import {
   Breadcrumbs,
   usePathBreadcrumbs,
   buildPathBreadcrumbs,
+  getLinkRoutingProps,
   toJsonLd,
   BreadcrumbJsonLd,
   breadcrumbsToJsonLd,
@@ -48,6 +49,10 @@ describe("index exports", () => {
       { label: "A", href: "/a" },
       { label: "B" },
     ]);
+  });
+
+  it("exports getLinkRoutingProps helper", () => {
+    expect(getLinkRoutingProps("/x", "to")).toEqual({ to: "/x", href: "/x" });
   });
 
   it("does not export React Router hooks from the main entry", async () => {

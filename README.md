@@ -188,11 +188,11 @@ Published files live under **`dist/`** (`main` / `types` / `exports` all point t
 | --------------- | ------------------------------------------------------------------------------------------------ | -------------------- | --------------------------------------------------------- |
 | `items`         | `{ label: string; href?: string; icon?: React.ReactNode; title?: string; external?: boolean }[]` | **required**         | The breadcrumb trail; last item usually has no `href`.    |
 | `LinkComponent` | `React.ElementType`                                                                              | `@mui/material/Link` | Custom link component (for example Next.js `Link`).       |
-| `linkProp`      | `"href" \| "to"`                                                                                 | `"href"`             | Routing prop for `LinkComponent`. Use `"to"` with React Router. |
+| `linkProp`      | `"href" \| "to"`                                                                                 | `"href"`             | `"to"` for React Router. Always still sets native `href` so right-click / open in new tab works. |
 | `maxItems` / `itemsBeforeCollapse` / `itemsAfterCollapse` / `expandText` | number / string | - | First-class MUI collapse controls for deep trails. |
 | `size`          | `"small" \| "medium" \| "large"`                                                                 | `"medium"`           | Crumb text size.                                          |
 | `truncate`      | `boolean \| number`                                                                              | `false`              | Ellipsis long labels (`true` = 160px, or pass max width px). |
-| `jsonLdOrigin`  | `string`                                                                                         | -                    | When set, also emits BreadcrumbList JSON-LD for these items. |
+| `jsonLdOrigin`  | `string`                                                                                         | -                    | When set, also emits BreadcrumbList JSON-LD for these items (relative URLs resolve against it). |
 | `muiProps`      | `Omit<MUIBreadcrumbsProps,"children" \| collapse props>`                                         | -                    | Extra props for MUI `<Breadcrumbs />`.                    |
 | `separatorIcon` | `React.ReactNode`                                                                                | `ChevronRightIcon`   | Icon/node placed between items.                           |
 | `homeLabel`     | `string`                                                                                         | `"Home"`             | Display label for the home crumb (`homeHref`).            |
@@ -356,7 +356,15 @@ import { useReactRouterBreadcrumbs } from "@ameshkin/nextcrumbs/hooks/useReactRo
 // <Breadcrumbs LinkComponent={RouterLink} linkProp="to" items={items} />
 ```
 
-`react-router-dom` is optional. Install it only when you use that subpath.
+`linkProp="to"` adds React Router's `to` **and** keeps a native `href`, so right-click "Open in new tab" still works. `react-router-dom` is optional. Install it only when you use that subpath.
+
+### Can I emit JSON-LD from `<Breadcrumbs>`?
+
+Yes. Pass `jsonLdOrigin` (your site origin). Relative crumb hrefs resolve against it:
+
+```tsx
+<Breadcrumbs items={items} jsonLdOrigin="https://yoursite.com" LinkComponent={Link} />
+```
 
 ### Do I need `react-router-dom` for Next.js?
 

@@ -2,7 +2,7 @@
 
 ### Bug hunt fixes + features (still 0.2.1, unpublished)
 
-- **BH-01 / `linkProp`:** `linkProp="href" | "to"` so React Router `Link` works without an adapter.
+- **BH-01 / `linkProp`:** `linkProp="href" | "to"` so React Router `Link` works without an adapter. When `"to"`, native `href` is still set (right-click / open in new tab / middle-click).
 - **BH-02:** Default root margin is `mb: 0` (set margin via `sx`).
 - **BH-03:** Home icon is `href === homeHref` only (not label match). New `homeHref` prop.
 - **BH-04:** React Router at `/` returns `{ label }` with no self-link `href`.

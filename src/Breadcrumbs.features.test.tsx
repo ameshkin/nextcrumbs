@@ -39,6 +39,18 @@ describe("Breadcrumbs feature props", () => {
     const parsed = JSON.parse(script!.textContent!);
     expect(parsed["@type"]).toBe("BreadcrumbList");
     expect(parsed.itemListElement[0].item).toBe("https://site.test/");
+    expect(parsed.itemListElement[1].item).toBe("https://site.test/admin");
+    // Trail links still remain real anchors (right-click / open in new tab).
+    const links = screen.getAllByRole("link");
+    expect(links[0]).toHaveAttribute("href", "/");
+    expect(links[1]).toHaveAttribute("href", "/admin");
+  });
+
+  it("does not emit JSON-LD when jsonLdOrigin is omitted", () => {
+    const { container } = render(
+      <Breadcrumbs items={deepItems} LinkComponent={TestLink} />
+    );
+    expect(container.querySelector('script[type="application/ld+json"]')).toBeNull();
   });
 
   it("applies size and truncate styles", () => {

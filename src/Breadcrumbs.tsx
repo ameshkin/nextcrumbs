@@ -44,6 +44,8 @@ export type BreadcrumbsProps = {
   /**
    * Which routing prop to pass to `LinkComponent`.
    * Use `"href"` for Next.js / MUI (default). Use `"to"` for React Router `Link`.
+   * When `"to"`, a native `href` is still set so right-click / middle-click /
+   * "Open in new tab" / "Copy link" keep working.
    */
   linkProp?: BreadcrumbLinkProp;
   /** Props to pass through to the underlying MUI Breadcrumbs component */
@@ -109,6 +111,22 @@ const SIZE_FONT: Record<BreadcrumbSize, number> = {
   medium: 14,
   large: 16,
 };
+
+/**
+ * Builds props for the consumer Link.
+ * Always includes a string `href` so the rendered `<a>` stays a real hyperlink
+ * (context menu, open in new tab, middle-click, copy link address).
+ * When `linkProp` is `"to"`, also sets `to` for React Router.
+ */
+export function getLinkRoutingProps(
+  href: string,
+  linkProp: BreadcrumbLinkProp = "href"
+): { href: string; to?: string } {
+  if (linkProp === "to") {
+    return { to: href, href };
+  }
+  return { href };
+}
 
 type CrumbContentProps = {
   icon?: React.ReactNode;
@@ -256,14 +274,14 @@ export default function Breadcrumbs({
       />
     );
 
-    if (isLink) {
-      const routingProps =
-        linkProp === "to" ? { to: item.href } : { href: item.href };
+    if (isLink && typeof item.href === "string") {
+      const routingProps = getLinkRoutingProps(item.href, linkProp);
 
       return (
         <MUILink
           key={key}
           component={LinkComponent}
+          underline="hover"
           {...routingProps}
           sx={sxJoin(defaultLinkSx, linkSx, itemSx)}
           {...(item.external ? { rel: "noopener noreferrer", target: "_blank" } : {})}

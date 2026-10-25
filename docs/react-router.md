@@ -42,7 +42,9 @@ export default function Demo() {
 
 ## With SPA navigation (Router `<Link>`)
 
-Pass React Router's `<Link>` as `LinkComponent` and set **`linkProp="to"`** (React Router expects `to`, not `href`):
+Pass React Router's `<Link>` as `LinkComponent` and set **`linkProp="to"`**.
+
+NextCrumbs still sets a native **`href`** on every crumb link so right-click "Open in new tab", middle-click, and "Copy link" work. `to` drives SPA navigation.
 
 ```tsx
 import { Link as RouterLink, BrowserRouter, Routes, Route } from "react-router-dom";
@@ -156,5 +158,6 @@ it("renders trail", () => {
 ## Notes
 
 * Install `react-router-dom` only if you use this subpath.
-* For SPA navigation, pass `LinkComponent={RouterLink}` and `linkProp="to"`. Without `linkProp="to"`, crumbs still emit `href`, which breaks direct Router `Link` usage.
+* For SPA navigation, pass `LinkComponent={RouterLink}` and `linkProp="to"`. Crumbs always keep a native `href` for browser context menus; `to` is added for React Router.
+* Your `LinkComponent` must render a real `<a>` (or forward `href` to one). Otherwise right-click open will not work.
 * Do not import this hook from the main `@ameshkin/nextcrumbs` barrel (removed in 0.2.1).
