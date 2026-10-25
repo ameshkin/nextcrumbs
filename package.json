@@ -1,7 +1,7 @@
 {
   "name": "@ameshkin/nextcrumbs",
   "version": "0.2.1",
-  "description": "MUI breadcrumbs with Next.js Link support, optional URL auto-generation, and SEO microdata.",
+  "description": "MUI breadcrumbs for Vite, Next.js, and any React app. Pluggable Link, optional URL helpers, and SEO JSON-LD.",
   "license": "MIT",
   "type": "module",
   "author": "Amir Meshkin <amir.meshkin@gmail.com> (https://github.com/ameshkin)",
@@ -104,13 +104,15 @@
   "keywords": [
     "mui",
     "breadcrumbs",
-    "nextjs",
     "react",
+    "vite",
+    "nextjs",
     "material-ui",
     "seo",
     "schema.org",
     "app router",
-    "react router"
+    "react router",
+    "remix"
   ],
   "publishConfig": {
     "access": "public"

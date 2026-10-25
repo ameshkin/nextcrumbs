@@ -1,6 +1,6 @@
 # NextCrumbs
 
-> MUI **^7** breadcrumbs with **Next.js Link** support, optional **URL-based generation**, and **built-in SEO microdata**. Router-agnostic. Zero runtime dependencies (peers only).
+> MUI **^7** breadcrumbs for **any React app**. Works with **Vite**, CRA, Remix, and plain React. **Next.js is optional** (the package was originally built for it). Pass your own `LinkComponent` when you want client-side routing. Optional URL helpers and SEO JSON-LD. Zero runtime dependencies (peers only).
 
 | Item            | Value                                                                        | Badge                                                                                                                                                                                                                                                                                                                                                                                              |
 | --------------- | ---------------------------------------------------------------------------- |----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -24,6 +24,7 @@
 * [Features](#features)
 * [Requirements](#requirements)
 * [Install](#install)
+* [Quick Start (Vite / any React)](#quick-start-vite--any-react)
 * [Quick Start (Next.js)](#quick-start-nextjs)
 * [Auto from URL (Next App Router)](#auto-from-url-next-app-router)
 * [React Router](#react-router)
@@ -42,15 +43,18 @@
 
 ## Features
 
+* **Works without Next.js.** Vite, CRA, Remix, and plain React are first-class. Next.js is optional.
 * **MUI ^7** breadcrumbs under the hood (accessible, stable)
-* **Next.js** ready via pluggable `LinkComponent` (for example `next/link`)
+* **Pluggable `LinkComponent`.** Use MUI's default link, React Router `Link` (`linkProp="to"`), or `next/link`
 * Optional **URL → items** helpers: `usePathBreadcrumbs` (client) and RSC-safe `buildPathBreadcrumbs`
-* **React Router** helper on a **subpath only** (`useReactRouterBreadcrumbs`). Use `linkProp="to"`
+* **React Router** helper on a **subpath only** (`useReactRouterBreadcrumbs`)
 * **JSON-LD** helpers for schema.org `BreadcrumbList` (no `example.com` default)
 * First-class `maxItems` / collapse, `size`, `truncate`, and optional `jsonLdOrigin`
 * Tree-shakable **subpath exports** (`/breadcrumbs`, `/hooks/*`, `/utils/*`)
 * Fully typed with TypeScript
 * **Trusted Publishing** workflow (`.github/workflows/publish.yml`) for OTP-free CI releases
+
+Originally built for Next.js App Router. The public API is router-agnostic, so the bundler does not matter.
 
 ---
 
@@ -61,8 +65,8 @@
 * `@mui/material` **^7** (MUI 8/9 are outside this peer range)
 * `@mui/icons-material` **^7** (default home / separator icons)
 * `@emotion/react` and `@emotion/styled` **^11**
-* Next.js **13.4+** if using App Router examples
-* (Optional) `react-router-dom` **6+** only if you import the React Router subpath
+* **Next.js is not required.** Use it only if your app already does (App Router examples assume 13.4+)
+* (Optional) `react-router-dom` **6+** only if you import the React Router subpath (common with Vite)
 
 ---
 
@@ -74,15 +78,64 @@ npm i @ameshkin/nextcrumbs
 # required peers
 npm i @mui/material @mui/icons-material @emotion/react @emotion/styled react react-dom
 
-# optional: only if you use the React Router subpath hook
+# optional: only if you use the React Router subpath hook (typical Vite SPA)
 npm i react-router-dom
 ```
 
-Next.js apps that only use `Breadcrumbs` / `usePathBreadcrumbs` do **not** need `react-router-dom`.
+You do **not** need Next.js. Vite and other React toolchains only need the peers above (plus React Router if you use that subpath).
+
+---
+
+## Quick Start (Vite / any React)
+
+No Next.js. Default MUI links work out of the box:
+
+```tsx
+import { Breadcrumbs } from "@ameshkin/nextcrumbs";
+
+export function HeaderTrail() {
+  return (
+    <Breadcrumbs
+      items={[
+        { label: "Home", href: "/" },
+        { label: "Products", href: "/products" },
+        { label: "New" }
+      ]}
+    />
+  );
+}
+```
+
+### Vite + React Router
+
+```tsx
+import { Link as RouterLink } from "react-router-dom";
+import { Breadcrumbs } from "@ameshkin/nextcrumbs";
+import { useReactRouterBreadcrumbs } from "@ameshkin/nextcrumbs/hooks/useReactRouterBreadcrumbs";
+
+export function Trail() {
+  const items = useReactRouterBreadcrumbs({ rootLabel: "Home" });
+  return (
+    <Breadcrumbs
+      LinkComponent={RouterLink}
+      linkProp="to"
+      items={items}
+    />
+  );
+}
+```
+
+You can also pass `useLocation().pathname` into `usePathBreadcrumbs` if you prefer the path helper.
+
+Wrap the app in Vite as usual (`BrowserRouter`, MUI `ThemeProvider`). No Next.js plugins or `"use client"` directives are required for this path.
+
+See also [`docs/vanilla-json.md`](./docs/vanilla-json.md) and [`docs/react-router.md`](./docs/react-router.md).
 
 ---
 
 ## Quick Start (Next.js)
+
+Optional. Use this only in a Next.js App Router project:
 
 ```tsx
 "use client";
@@ -288,9 +341,9 @@ See [`docs/vanilla-json.md`](./docs/vanilla-json.md).
 
 | Guide | Path |
 | --- | --- |
-| Next.js App Router | [`docs/next-router.md`](./docs/next-router.md) |
+| Vite / any React + JSON-LD | [`docs/vanilla-json.md`](./docs/vanilla-json.md) |
 | React Router | [`docs/react-router.md`](./docs/react-router.md) |
-| Vanilla + JSON-LD | [`docs/vanilla-json.md`](./docs/vanilla-json.md) |
+| Next.js App Router (optional) | [`docs/next-router.md`](./docs/next-router.md) |
 | Subpath exports (CI / GitLab) | [`docs/gitlab.md`](./docs/gitlab.md) |
 | Export & API changelog | [`docs/changes.md`](./docs/changes.md) |
 | Docs index | [`docs/README.md`](./docs/README.md) |
@@ -340,6 +393,14 @@ This package peers **`@mui/material@^7`**. Do not run `npm audit fix --force` to
 ---
 
 ## FAQ
+
+### Do I need Next.js?
+
+No. NextCrumbs is a React + MUI component. It works in **Vite**, CRA, Remix, and other React setups. Next.js is optional. The name reflects the original Next.js target, not a hard dependency.
+
+### Does it work with Vite?
+
+Yes. Install the package and MUI peers, then render `<Breadcrumbs items={...} />`. For SPAs, pair with React Router and `linkProp="to"` (see [Quick Start (Vite / any React)](#quick-start-vite--any-react)). There is no Vite-specific plugin.
 
 ### Does it work with React Router?
 
@@ -392,9 +453,9 @@ npm i @ameshkin/nextcrumbs@^0.2.1
 
 | Topic | Doc |
 | --- | --- |
-| Next.js App Router | [`docs/next-router.md`](./docs/next-router.md) |
+| Vite / no Next.js / JSON-LD | [`docs/vanilla-json.md`](./docs/vanilla-json.md) |
 | React Router | [`docs/react-router.md`](./docs/react-router.md) |
-| JSON-LD / no router | [`docs/vanilla-json.md`](./docs/vanilla-json.md) |
+| Next.js App Router | [`docs/next-router.md`](./docs/next-router.md) |
 | Subpath exports | [`docs/gitlab.md`](./docs/gitlab.md) |
 | Changelog | [`docs/changes.md`](./docs/changes.md) |
 

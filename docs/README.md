@@ -4,9 +4,9 @@ Guides for `@ameshkin/nextcrumbs` **0.2.1+**.
 
 | Guide | Audience |
 | --- | --- |
-| [next-router.md](./next-router.md) | Next.js App Router (`usePathBreadcrumbs`, RSC `buildPathBreadcrumbs`) |
-| [react-router.md](./react-router.md) | Optional React Router subpath (`linkProp="to"`) |
-| [vanilla-json.md](./vanilla-json.md) | Router-free usage and JSON-LD SEO |
+| [vanilla-json.md](./vanilla-json.md) | Vite / any React (no Next.js) and JSON-LD SEO |
+| [react-router.md](./react-router.md) | Optional React Router subpath (`linkProp="to"`), common with Vite |
+| [next-router.md](./next-router.md) | Optional Next.js App Router (`usePathBreadcrumbs`, RSC helper) |
 | [gitlab.md](./gitlab.md) | Subpath exports and CI consumption |
 | [changes.md](./changes.md) | Export layout and 0.2.1 notes |
 

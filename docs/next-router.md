@@ -1,8 +1,8 @@
 # NextCrumbs • Next.js App Router
 
-Derive breadcrumb items from `next/navigation` and render with `next/link`.
+Optional guide for Next.js. NextCrumbs itself does **not** require Next.js (Vite and other React apps work fine; see [vanilla-json.md](./vanilla-json.md)).
 
-You do **not** need `react-router-dom` for this path.
+Derive breadcrumb items from `next/navigation` and render with `next/link`. You do **not** need `react-router-dom` for this path.
 
 ## Quick start (client)
 

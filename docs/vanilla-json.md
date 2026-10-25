@@ -1,8 +1,47 @@
-# NextCrumbs • Vanilla React / JSON-LD
+# NextCrumbs • Vite, vanilla React, JSON-LD
 
-Use `<Breadcrumbs>` without a router, or add page-level JSON-LD for SEO.
+Use `<Breadcrumbs>` in **Vite**, CRA, or any React app **without Next.js**. Add page-level JSON-LD when you need SEO.
 
-Requires MUI and Emotion peers. Does **not** require Next.js or React Router.
+Requires MUI and Emotion peers. Does **not** require Next.js. React Router is optional (see [react-router.md](./react-router.md)).
+
+## Vite (or any bundler)
+
+```bash
+npm i @ameshkin/nextcrumbs @mui/material @mui/icons-material @emotion/react @emotion/styled
+```
+
+No Vite plugin. Import the ESM package and render under your existing `ThemeProvider`:
+
+```tsx
+import { Breadcrumbs } from "@ameshkin/nextcrumbs";
+
+export function HeaderTrail() {
+  return (
+    <Breadcrumbs
+      items={[
+        { label: "Home", href: "/" },
+        { label: "Docs", href: "/docs" },
+        { label: "API" }
+      ]}
+    />
+  );
+}
+```
+
+### Vite + React Router
+
+```tsx
+import { Link as RouterLink } from "react-router-dom";
+import { Breadcrumbs } from "@ameshkin/nextcrumbs";
+import { useReactRouterBreadcrumbs } from "@ameshkin/nextcrumbs/hooks/useReactRouterBreadcrumbs";
+
+export function Trail() {
+  const items = useReactRouterBreadcrumbs({ rootLabel: "Home" });
+  return <Breadcrumbs LinkComponent={RouterLink} linkProp="to" items={items} />;
+}
+```
+
+You can also feed `usePathBreadcrumbs(useLocation().pathname)` if you prefer the path helper over the React Router subpath hook.
 
 ## Manual items
 
@@ -24,6 +63,7 @@ export default function ManualTrail() {
 
 * Omit `LinkComponent` to use the default MUI link for items with `href`.
 * Prefer omitting `href` on the last item (current page). The last crumb is never rendered as a link even if `href` is present.
+* `"use client"` is a Next.js App Router directive. You do not need it in Vite.
 
 ## JSON-LD
 
